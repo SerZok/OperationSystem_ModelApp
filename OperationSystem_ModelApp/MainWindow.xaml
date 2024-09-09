@@ -68,8 +68,8 @@
             <TabItem Header="TaskBar">
                 <DataGrid SelectedItem="{Binding SelectedTask}" AutoGenerateColumns="False" Background="#888" Grid.Row="1" ItemsSource="{Binding ProcessesOS}" ColumnWidth="*">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
-                        <DataGridTextColumn Header="ОЗУ" Binding="{Binding Ram}"/>
+                        <DataGridTextColumn Width="Auto" Header="ID" Binding="{Binding Id}"/>
+                        <DataGridTextColumn Width="150"  Header="ОЗУ" Binding="{Binding Ram}"/>
                         <DataGridTextColumn Header="Состояние" Binding="{Binding State}"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -108,8 +108,8 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="CPU" Style="{StaticResource LabelAlign}"/>
-                <TextBox Grid.Row="1" IsReadOnly="True" TextAlignment="Center"/>
+                <Label Content="Остаток ОЗУ" Style="{StaticResource LabelAlign}"/>
+                <TextBox Text="{Binding RamOS_ostatok}" Grid.Row="1" IsReadOnly="True" TextAlignment="Center"/>
             </Grid>
 
             <!--Количество RAM у OS-->

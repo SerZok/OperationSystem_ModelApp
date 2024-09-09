@@ -17,7 +17,10 @@ namespace OperationSystem_ModelApp.Model
         public int Kvant;
         public int Takt { get; set; }
 
-        public int Ram;
+        private int _ram=1024;
+        public int Ram { get => _ram; set=>_ram=value; }
+
+        private int _ram_ost;
 
         /// <summary>
         /// Такты для запуска задачи
@@ -51,6 +54,7 @@ namespace OperationSystem_ModelApp.Model
         {
             _Processes = new ObservableCollection<MyProcess>();
             _listMyPros = new List<MyProcess>();
+            _ram_ost = _ram;
         }
         public void AddProcess()
         {
@@ -60,6 +64,7 @@ namespace OperationSystem_ModelApp.Model
         public void RemoveProcess(MyProcess proc)
         {
             _Processes.Remove(proc);
+            _ram_ost += proc.Ram;
         }
         public void PlusTakt()
         {
@@ -71,13 +76,15 @@ namespace OperationSystem_ModelApp.Model
         }
 
         public List<MyProcess> _listMyPros;
-        public async void StartGenerating(CancellationToken cancellationToken)
+        public async void Generating(CancellationToken cancellationToken)
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     _listMyPros.Add(new MyProcess());
+
+                    CheckRam();
                     await Task.Delay(1000);
                 }
             }
@@ -87,10 +94,26 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        private void CheckRam()
+        //Если хватает свободнлй памяти для задачи,
+        //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
+        public void CheckRam()
         {
-            //Если хватает свободнлй памяти для задачи,
-            //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
+
+            while (_listMyPros.Count > 0)
+            {
+                var firstItem = _listMyPros.First();
+                if (_ram_ost >= firstItem.Ram)
+                {
+                    _Processes.Add(firstItem);
+                    _ram_ost -= firstItem.Ram;
+                    _listMyPros.Remove(firstItem);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
         }
     }
 }

@@ -28,6 +28,8 @@ namespace OperationSystem_ModelApp.ViewModel
         private Visibility _isVisableProperty;
         private MyProcess selectedTask;             //Выбарнная задача
         private int _ramOS;                         //ОЗУ ОС
+        private int _ramOS_ostatok;
+
         private int takt;                           //Такты
         private int kvant;                          //Кванты
         private bool firstLaunch = true;            //Чтоб не ломать потоки
@@ -66,6 +68,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.Ram = RamOS;
                 CountTasks = ProcessesOS.Count;
                 CountListTasks = operatingSystem._listMyPros.Count;
+                
             }
         }
         private bool IsGenerating
@@ -79,7 +82,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 if (isGenerating)
                 {
                     cancellationTokenSource = new CancellationTokenSource();
-                    operatingSystem.StartGenerating(cancellationTokenSource.Token);
+                    operatingSystem.Generating(cancellationTokenSource.Token);
                 }
                 else
                 {
@@ -109,6 +112,16 @@ namespace OperationSystem_ModelApp.ViewModel
                 }
             }
 
+        }
+
+        public int RamOS_ostatok
+        {
+            get => _ramOS_ostatok;
+            set
+            {
+                _ramOS_ostatok = value;
+                OnPropertyChanged("RamOS_ostatok");
+            }
         }
         public Visibility IsVisableProperty
         {
