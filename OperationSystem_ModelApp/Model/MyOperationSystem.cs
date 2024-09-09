@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using System.Windows.Controls.Primitives;
+using System.Windows;
 
 
 namespace OperationSystem_ModelApp.Model
@@ -13,7 +15,7 @@ namespace OperationSystem_ModelApp.Model
      /// Число тактов
      /// </summary>
         public int Kvant;
-        public int _Takt { get; set; }
+        public int Takt { get; set; }
 
         public int Ram;
 
@@ -45,11 +47,11 @@ namespace OperationSystem_ModelApp.Model
         private int Speed;
 
         public ObservableCollection<MyProcess> _Processes;
-        public MyOperationSystem(ObservableCollection<MyProcess> list)
+        public MyOperationSystem()
         {
-            _Processes = list;
+            _Processes = new ObservableCollection<MyProcess>();
+            _listMyPros = new List<MyProcess>();
         }
-
         public void AddProcess()
         {
             _Processes.Add(new MyProcess());
@@ -59,14 +61,36 @@ namespace OperationSystem_ModelApp.Model
         {
             _Processes.Remove(proc);
         }
-
-        public void Update()
+        public void PlusTakt()
         {
             while (true)
             {
-                _Takt++;
+                Takt++;
                 Thread.Sleep(100);
             }
+        }
+
+        public List<MyProcess> _listMyPros;
+        public async void StartGenerating(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    _listMyPros.Add(new MyProcess());
+                    await Task.Delay(1000);
+                }
+            }
+            catch(TaskCanceledException e)
+            {
+                MessageBox.Show($"Generating error:(TaskCanceledException) {e}");
+            }
+        }
+
+        private void CheckRam()
+        {
+            //Если хватает свободнлй памяти для задачи,
+            //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
         }
     }
 }

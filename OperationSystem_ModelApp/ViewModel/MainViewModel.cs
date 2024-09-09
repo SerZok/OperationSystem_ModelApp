@@ -16,20 +16,24 @@ namespace OperationSystem_ModelApp.ViewModel
     internal class MainViewModel : INotifyPropertyChanged
     {
         private MyOperationSystem operatingSystem;
-        private string textConsole;
-        private RelayCommand startOS;
-        private RelayCommand addCommand;
-        private RelayCommand delCommand;
-        private RelayCommand autoAddTask;
-        private RelayCommand offAutoAddTask;
-        private int downloadCountTasks;
-        private bool isGenerating;
+        private string textConsole;                 //Текст в консоли
+        private RelayCommand startOS;               //Кнопка запуск ОС
+        private RelayCommand addCommand;            //Кнопка добавить задачу
+        private RelayCommand delCommand;            //Кнопка удалить выбранную задачу
+        private RelayCommand autoAddTask;           //Включатель авто-генерации задач
+        private RelayCommand offAutoAddTask;        //Выключтель авто-генерации
+        private bool isGenerating;                  //Bool для переключателя
+        private Thread threadForOS, threadForUI;    //Потоки для обновления и генерации в цикле
+        private int downloadCountTasks;             //Количество задач, которые выполняются
         private Visibility _isVisableProperty;
-        private MyProcess selectedTask;
-        private int _ramOS;
-        private int takt;
-        private Thread threadForOS, threadForUI;
-        public int kvant;
+        private MyProcess selectedTask;             //Выбарнная задача
+        private int _ramOS;                         //ОЗУ ОС
+        private int takt;                           //Такты
+        private int kvant;                          //Кванты
+        private bool firstLaunch = true;            //Чтоб не ломать потоки
+        private int _countTasks;                    //Задачи на выполнении
+        private int _countListTasks;                //Всего задач 
+        private CancellationTokenSource cancellationTokenSource; //Для корректной работы генератора заданий
         public int Kvant
         {
             get => kvant;
@@ -39,96 +43,29 @@ namespace OperationSystem_ModelApp.ViewModel
                 OnPropertyChanged("Kvant");
             }
         }
-
         public MainViewModel()
         {
-            operatingSystem = new MyOperationSystem(new ObservableCollection<MyProcess>());
+            operatingSystem = new MyOperationSystem();
             ProcessesOS = operatingSystem._Processes;
             IsGenerating = false;
             IsVisableProperty = Visibility.Hidden;
+            RamOS = 1024;
 
-            threadForOS = new Thread(new ThreadStart(operatingSystem.Update));
+            threadForOS = new Thread(new ThreadStart(operatingSystem.PlusTakt));
             threadForUI = new Thread(UpdateForUI);
-
-        }
-
-        private bool firstLaunch = true;
-        private void UpdateForUI() //Метод для обновления Тиков. Нужен для потока
-        {
-            while (true)
-            {
-                Takt = operatingSystem._Takt;
-                operatingSystem.Ram = RamOS;
-            }
-        }
-
-        public int Takt
-        {
-            get { return takt; }
-            set
-            {
-                takt = value;
-                OnPropertyChanged("Takt");
-            }
-        }
-
-        public int RamOS
-        {
-            get
-            {
-                return _ramOS;
-            }
-            set
-            {
-                _ramOS = value;
-                OnPropertyChanged("RamOS");
-            }
-
-        }
-        public Visibility IsVisableProperty
-        {
-            get { return _isVisableProperty; }
-            set
-            {
-                if (_isVisableProperty != value)
-                {
-                    _isVisableProperty = value;
-                    OnPropertyChanged("IsVisableProperty");
-                }
-            }
+            
         }
 
         public Random random;
         public ObservableCollection<MyProcess> ProcessesOS { get; private set; }
-        public MyProcess SelectedTask
+        private void UpdateForUI() //Метод для обновления полей для отображения. Нужен для потока
         {
-            get => selectedTask;
-            set
+            while (true)
             {
-                if (selectedTask != value)
-                {
-                    selectedTask = value;
-                    OnPropertyChanged("SelectedTask");
-                }
-            }
-        }
-
-        public string TextConsole
-        {
-            get { return textConsole; }
-            private set
-            {
-                textConsole = value;
-                OnPropertyChanged("TextConsole");
-            }
-        }
-        public int DownloadCountTasks
-        {
-            get => downloadCountTasks;
-            set
-            {
-                downloadCountTasks = value;
-                OnPropertyChanged("DownloadCountTasks");
+                Takt = operatingSystem.Takt;
+                operatingSystem.Ram = RamOS;
+                CountTasks = ProcessesOS.Count;
+                CountListTasks = operatingSystem._listMyPros.Count;
             }
         }
         private bool IsGenerating
@@ -138,11 +75,95 @@ namespace OperationSystem_ModelApp.ViewModel
             {
                 isGenerating = value;
                 OnPropertyChanged("IsGenerating");
+
                 if (isGenerating)
-                    StartGenerating();
+                {
+                    cancellationTokenSource = new CancellationTokenSource();
+                    operatingSystem.StartGenerating(cancellationTokenSource.Token);
+                }
+                else
+                {
+                    cancellationTokenSource?.Cancel();
+                }
+            }
+        }
+        public int Takt
+        {
+            get { return takt; }
+            set
+            {
+                if (takt != value){
+                    takt = value;
+                    OnPropertyChanged("Takt");
+                }
+            }
+        }
+        public int RamOS
+        {
+            get => _ramOS;
+            set
+            {
+                if(value != _ramOS) {
+                    _ramOS = value;
+                    OnPropertyChanged("RamOS");
+                }
+            }
+
+        }
+        public Visibility IsVisableProperty
+        {
+            get => _isVisableProperty;
+            set
+            {
+                if (value != _isVisableProperty){
+                    _isVisableProperty = value;
+                    OnPropertyChanged("IsVisableProperty");
+                }
+            }
+        }
+        public MyProcess SelectedTask
+        {
+            get => selectedTask;
+            set {
+                if (selectedTask != value) {
+                    selectedTask = value;
+                    OnPropertyChanged("SelectedTask");
+                }
+            }
+        }
+        public string TextConsole
+        {
+            get { return textConsole; }
+            private set
+            {
+                textConsole = value;
+                OnPropertyChanged("TextConsole");
+            }
+        }
+        public int CountTasks
+        {
+            get => _countTasks;
+            set
+            {
+                if (_countTasks != value){
+                    _countTasks = value;
+                    OnPropertyChanged("CountTasks");
+                }
             }
         }
 
+        public int CountListTasks
+        {
+            get { return _countListTasks; }
+            set
+            {
+                if (_countListTasks != value)
+                {
+                    _countListTasks = value;
+                    OnPropertyChanged("CountListTasks");
+                }
+            }
+        }
         public RelayCommand AutoAddTask
         {
             get
@@ -165,17 +186,6 @@ namespace OperationSystem_ModelApp.ViewModel
                     }));
             }
         }
-
-        private async void StartGenerating()
-        {
-            while (IsGenerating)
-            {
-                operatingSystem.AddProcess();
-                DownloadCountTasks++;
-                await Task.Delay(1000);
-            }
-        }
-
         public RelayCommand StartOS
         {
             get
@@ -193,14 +203,13 @@ namespace OperationSystem_ModelApp.ViewModel
                         else
                         {
                             //Просто обнуляем счетчик тактов
-                            operatingSystem._Takt = 0;
+                            operatingSystem.Takt = 0;
+                            ProcessesOS.Clear();
                         }
-
                         TextConsole = "Запуск Операционной системы...";
                     }));
             }
         }
-
         public RelayCommand ADDCommand
         {
             get
@@ -210,12 +219,9 @@ namespace OperationSystem_ModelApp.ViewModel
                     (addCommand = new RelayCommand(obj =>
                     {
                         operatingSystem.AddProcess();
-                        DownloadCountTasks++;
                     }));
             }
         }
-
-
         public RelayCommand DelTask
         {
             get
@@ -226,13 +232,10 @@ namespace OperationSystem_ModelApp.ViewModel
                         if (SelectedTask != null)
                         {
                             operatingSystem.RemoveProcess(SelectedTask);
-                            DownloadCountTasks--;
                         }
                     }));
             }
         }
-
-
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -240,9 +243,5 @@ namespace OperationSystem_ModelApp.ViewModel
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
-
     }
-
-
-
 }

@@ -66,7 +66,13 @@
         <!--Консоль/TaskBar-->
         <TabControl Grid.Row="1" Grid.Column="1" >
             <TabItem Header="TaskBar">
-                <DataGrid Name="TaskBar" SelectedItem="{Binding SelectedTask}" Background="Beige" Grid.Row="1" ItemsSource="{Binding ProcessesOS}" ColumnWidth="*"/>
+                <DataGrid SelectedItem="{Binding SelectedTask}" AutoGenerateColumns="False" Background="#888" Grid.Row="1" ItemsSource="{Binding ProcessesOS}" ColumnWidth="*">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
+                        <DataGridTextColumn Header="ОЗУ" Binding="{Binding Ram}"/>
+                        <DataGridTextColumn Header="Состояние" Binding="{Binding State}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </TabItem>
             <TabItem Header="Console">
                 <TextBlock Name="Console" Background="White" Text="{Binding TextConsole}" Margin="15"/>
@@ -122,8 +128,8 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Загружено задач" Style="{StaticResource LabelAlign}"/>
-                <TextBox IsReadOnly="True" Grid.Row="1" Text="{Binding DownloadCountTasks}" Style="{StaticResource TextBoxAlign}"/>
+                <Label Content="Всего задач" Style="{StaticResource LabelAlign}"/>
+                <TextBox IsReadOnly="True" Grid.Row="1" Text="{Binding CountListTasks}" Style="{StaticResource TextBoxAlign}"/>
             </Grid>
 
             <!--Количество задач в загрузке мб-->
@@ -133,7 +139,7 @@
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
                 <Label Content="Задачи в ОС"  Style="{StaticResource LabelAlign}"/>
-                <TextBox Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}"/>
+                <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding CountTasks}" Style="{StaticResource TextBoxAlign}"/>
             </Grid>
 
             <Grid Grid.Column="4" Margin="5" Background="#909090">
@@ -162,8 +168,6 @@
                 <Label Content="Такты" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding Takt}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}"/>
             </Grid>
-
-
         </Grid>
     </Grid>
 </Window>

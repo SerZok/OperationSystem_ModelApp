@@ -9,6 +9,7 @@ namespace OperationSystem_ModelApp.Model
     internal class MyProcess
     {
         private Random rnd;
+
         private static int id = 0;
         /// <summary>
         /// Количество памяти для выполнения задания;
