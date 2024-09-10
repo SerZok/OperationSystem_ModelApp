@@ -66,7 +66,7 @@
         <!--Консоль/TaskBar-->
         <TabControl Grid.Row="1" Grid.Column="1" >
             <TabItem Header="TaskBar">
-                <DataGrid SelectedItem="{Binding SelectedTask}" IsReadOnly="True" AutoGenerateColumns="False" Background="#888" Grid.Row="1" ItemsSource="{Binding ProcessesOS}" ColumnWidth="*">
+                <DataGrid HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectedItem="{Binding SelectedTask}" IsReadOnly="True" AutoGenerateColumns="False" Background="#888" Grid.Row="1" ItemsSource="{Binding ProcessesOS}" ColumnWidth="*">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="Auto" Header="ID" Binding="{Binding Id}"/>
                         <DataGridTextColumn Width="150"  Header="ОЗУ" Binding="{Binding Ram}"/>
@@ -96,6 +96,7 @@
                 <Style x:Key="LabelAlign" TargetType="Label">
                     <Setter Property="HorizontalAlignment" Value="Center" />
                     <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Foreground" Value="White"/>
                 </Style>
                 <Style x:Key="TextBoxAlign" TargetType="TextBox">
                     <Setter Property="HorizontalContentAlignment" Value="Center"/>

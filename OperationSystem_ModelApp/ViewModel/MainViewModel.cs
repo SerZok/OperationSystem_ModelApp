@@ -227,7 +227,9 @@ namespace OperationSystem_ModelApp.ViewModel
                             RamOS = 1024;
                             operatingSystem.Ram_ost = RamOS;
                             operatingSystem.Takt = 0;
-                            ProcessesOS.Clear();
+
+                            operatingSystem._listMyPros.Clear();
+                            operatingSystem._Processes.Clear();
                         }
                         TextConsole = "Запуск Операционной системы...";
                     }));
