@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,6 +69,8 @@ namespace OperationSystem_ModelApp.Model
                     sizeTypeCommand = 1;
                     break;
             }
+
+            Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
         }
         public TypeCommand()
         {

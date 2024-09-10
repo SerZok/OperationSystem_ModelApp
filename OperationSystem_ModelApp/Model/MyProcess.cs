@@ -48,14 +48,15 @@ namespace OperationSystem_ModelApp.Model
         {
             rnd = new Random();
             Commands = new List<Command>();
-            countCommands = rnd.Next(2, 30); //Максммум 30 комманд
+            countCommands = rnd.Next(2, 5); //Максммум 30 комманд
 
-            for (int i = 0; i < countCommands; i++)
+            for (int i = 1; i <= countCommands; i++)
             {
                 if (i==countCommands) //Последняя команда должна быть Завершающая (Close)
                 {
                     var commandLast = new Command(true);
                     Commands.Add(commandLast);
+                    Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
                 }
                 var command = new Command(false);
