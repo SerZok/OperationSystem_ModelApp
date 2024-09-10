@@ -29,7 +29,6 @@ namespace OperationSystem_ModelApp.ViewModel
         private MyProcess selectedTask;             //Выбарнная задача
         private int _ramOS;                         //ОЗУ ОС
         private int _ramOS_ostatok;
-
         private int takt;                           //Такты
         private int kvant;                          //Кванты
         private bool firstLaunch = true;            //Чтоб не ломать потоки
@@ -52,6 +51,7 @@ namespace OperationSystem_ModelApp.ViewModel
             IsGenerating = false;
             IsVisableProperty = Visibility.Hidden;
             RamOS = 1024;
+            kvant = 40;
 
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
@@ -78,6 +78,9 @@ namespace OperationSystem_ModelApp.ViewModel
 
                 if(operatingSystem.Ram!=RamOS)
                     operatingSystem.Ram = RamOS;
+
+                if (MyOperationSystem.Kvant != Kvant)
+                    MyOperationSystem.Kvant = Kvant;
             }
         }
         private bool IsGenerating

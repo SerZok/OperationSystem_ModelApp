@@ -36,18 +36,23 @@ namespace OperationSystem_ModelApp.Model
         /// Состояние процесса (Готов, Выполняется, Завершен)
         /// </summary>
         public ProcessState State { get; set; }
-
+        
         public MyProcess()
         {
             rnd = new Random();
             Commands = new List<Command>();
-            countCommands = rnd.Next(1, 10); //Максммум 10 комманд
+            countCommands = rnd.Next(2, 10); //Максммум 10 комманд
 
             for (int i = 0; i < countCommands; i++)
             {
-                var command = new Command();
+                if (i==countCommands)
+                {
+                    var commandLast = new Command(true);
+                    Commands.Add(commandLast);
+                    break;
+                }
+                var command = new Command(false);
                 Commands.Add(command);
-                Ram += command.RamCommand;
             }
             //MessageBox.Show($"Command #{Id}: Ram:{Ram}");
         }
@@ -55,9 +60,9 @@ namespace OperationSystem_ModelApp.Model
 
     public class Command
     {
-        
         private int id;
         private Random rnd;
+        public TypeCommand TypeCmd { get; private set; }
         public int Id
         {
             get => id;
@@ -66,14 +71,19 @@ namespace OperationSystem_ModelApp.Model
                 id++;
             }
         }
-        public int TimeForCommand { get; set; }
-        public int RamCommand { get; set; }
-
-        public Command()
+        private bool _islast;
+        public Command(bool islast)
         {
             rnd = new Random();
-            TimeForCommand = rnd.Next(0, 10000);
-            RamCommand = rnd.Next(10, 100);
+            _islast = islast;
+            if (!_islast)
+            {
+                TypeCmd = new TypeCommand(Enum.);
+            }
+            else
+            {
+                TypeCmd = new TypeCommand(NameTypeCommand.Close);
+            }
         }
     }
     public enum ProcessState
@@ -81,5 +91,44 @@ namespace OperationSystem_ModelApp.Model
         Ready,
         Running,
         Completed
+    }
+    public enum NameTypeCommand {Close, IO, Arithmetic}
+    public struct TypeCommand{
+        public NameTypeCommand nameTypeCommand;
+        public int timeTypeCommand;
+        public int sizeTypeCommand;
+
+        public TypeCommand(NameTypeCommand name)
+        {
+            nameTypeCommand = name;
+            switch (nameTypeCommand)
+            {
+                case NameTypeCommand.Close:
+                    timeTypeCommand = 0;
+                    sizeTypeCommand = 1;
+                    break;
+
+                case NameTypeCommand.IO:
+                    timeTypeCommand = 6;
+                    sizeTypeCommand = 5;
+                    break;
+
+                case NameTypeCommand.Arithmetic:
+                    timeTypeCommand = 4;
+                    sizeTypeCommand = 4;
+                    break;
+
+                default:
+                    timeTypeCommand = 1;
+                    sizeTypeCommand = 1;
+                    break;
+            }
+        }
+        public TypeCommand()
+        {
+            nameTypeCommand = "DefaultType";
+            timeTypeCommand = 0;
+            sizeTypeCommand = 0;
+        }
     }
 }
