@@ -35,18 +35,13 @@ namespace OperationSystem_ModelApp.ViewModel
         private int _countTasks;                    //Задачи на выполнении
         private int _countListTasks;                //Всего задач 
         private CancellationTokenSource cancellationTokenSource; //Для корректной работы генератора заданий
-        public int Kvant
-        {
-            get => kvant;
-            set
-            {
-                kvant = value;
-                OnPropertyChanged("Kvant");
-            }
-        }
+        private Stopwatch _stopwatch;
+        private string _strTimeOS;
+
         public MainViewModel()
         {
             operatingSystem = new MyOperationSystem();
+            _stopwatch=new Stopwatch();
             ProcessesOS = operatingSystem._Processes;
             IsGenerating = false;
             IsVisableProperty = Visibility.Hidden;
@@ -68,6 +63,8 @@ namespace OperationSystem_ModelApp.ViewModel
                 CountTasks = ProcessesOS.Count;
                 CountListTasks = operatingSystem._listMyPros.Count;
                 RamOS_ostatok = operatingSystem.Ram_ost;
+                StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
+
                 if (RamOS == 0) {
                     IsVisableProperty = Visibility.Hidden;
                 }
@@ -125,7 +122,6 @@ namespace OperationSystem_ModelApp.ViewModel
             }
 
         }
-
         public int RamOS_ostatok
         {
             get => _ramOS_ostatok;
@@ -133,6 +129,27 @@ namespace OperationSystem_ModelApp.ViewModel
             {
                 _ramOS_ostatok = value;
                 OnPropertyChanged("RamOS_ostatok");
+            }
+        }
+        public string StrTimeOS
+        {
+            get => _strTimeOS;
+            set
+            {
+                if (_strTimeOS != value)
+                {
+                    _strTimeOS = value;
+                    OnPropertyChanged("StrTimeOS");
+                }
+            }
+        }
+        public int Kvant
+        {
+            get => kvant;
+            set
+            {
+                kvant = value;
+                OnPropertyChanged("Kvant");
             }
         }
         public Visibility IsVisableProperty
@@ -224,9 +241,12 @@ namespace OperationSystem_ModelApp.ViewModel
                             threadForUI.Start();
                             IsVisableProperty = Visibility.Visible;
                             firstLaunch = false;
+                            _stopwatch.Start();
+
                         }
                         else
                         {
+                            _stopwatch.Restart();
                             RamOS = 1024;
                             operatingSystem.Ram_ost = RamOS;
                             operatingSystem.Takt = 0;
