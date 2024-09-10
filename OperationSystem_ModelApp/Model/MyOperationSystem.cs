@@ -12,10 +12,12 @@ using System.Net.WebSockets;
 namespace OperationSystem_ModelApp.Model
 {
     class MyOperationSystem
-    {/// <summary>
-     /// Число тактов
-     /// </summary>
-        public int Kvant;
+    {    /// <summary>
+         /// Сколько тактов в 1 кванте;
+         /// Число тактов моделирования, доступных процессу в состоянии «Активен»
+         /// Нужно для Processes (Сколько будет выполняться задача) ?
+         /// </summary>
+        public static int Kvant;
         public int Takt { get; set; }
 
         private int _ram = 1024;
@@ -117,6 +119,7 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        //Страт проверки ОЗУ
         private async void StartRamCheck(CancellationToken cancellationToken)
         {
             try
@@ -131,14 +134,14 @@ namespace OperationSystem_ModelApp.Model
             {
                 MessageBox.Show($"Eroor:(TaskCanceledException) {e}");
             }
-        }   //Старт проверки ОЗУ
+        }   
 
         public void StopRamCheck()
         {
             _cancellationTokenSource.Cancel();
         } //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
 
-        //Если хватает свободнлй памяти для задачи,
+        //Если хватает свободной памяти для задачи,
         //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
         public void CheckRam()
         {

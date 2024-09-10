@@ -158,7 +158,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Кол-во квантов" Style="{StaticResource LabelAlign}"/>
+                <Label Content="Квант (кол-во тактов)" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding Kvant}" Grid.Row="1" Style="{StaticResource TextBoxAlign}"/>
             </Grid>
 
