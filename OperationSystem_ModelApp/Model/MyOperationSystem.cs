@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
 using System.Windows;
+using System.Net.WebSockets;
 
 
 namespace OperationSystem_ModelApp.Model
@@ -17,10 +18,22 @@ namespace OperationSystem_ModelApp.Model
         public int Kvant;
         public int Takt { get; set; }
 
-        private int _ram=1024;
-        public int Ram { get => _ram; set=>_ram=value; }
-
+        private int _ram = 1024;
         private int _ram_ost;
+        public int Ram {
+            get => _ram; 
+            set
+            {
+                var _ram_used = _ram - _ram_ost;
+                _ram = value;
+                Ram_ost = _ram - _ram_used;
+            }
+        }
+        public int Ram_ost
+        { 
+            get => _ram_ost;
+            set => _ram_ost=value; 
+        }
 
         /// <summary>
         /// Такты для запуска задачи
@@ -50,23 +63,37 @@ namespace OperationSystem_ModelApp.Model
         private int Speed;
 
         public ObservableCollection<MyProcess> _Processes;
+        public List<MyProcess> _listMyPros;
+
+        private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
         public MyOperationSystem()
         {
             _Processes = new ObservableCollection<MyProcess>();
             _listMyPros = new List<MyProcess>();
             _ram_ost = _ram;
+            _cancellationTokenSource = new CancellationTokenSource();
+            StartRamCheck(_cancellationTokenSource.Token);
         }
-        public void AddProcess()
-        {
-            _Processes.Add(new MyProcess());
 
+        public void AddProcess()    //Добавляю процесс при нажитии на кнопку.
+        {
+            var proc = new MyProcess();
+            if (_ram_ost >= proc.Ram)
+            {
+                _Processes.Add(proc);
+                _ram_ost-= proc.Ram;
+            }
+            else
+            {
+                _listMyPros.Add(proc);
+            }
         }
-        public void RemoveProcess(MyProcess proc)
+        public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection выбранный процесс
         {
             _Processes.Remove(proc);
             _ram_ost += proc.Ram;
         }
-        public void PlusTakt()
+        public void CountTakt() //Счетчик тактов
         {
             while (true)
             {
@@ -74,17 +101,13 @@ namespace OperationSystem_ModelApp.Model
                 Thread.Sleep(100);
             }
         }
-
-        public List<MyProcess> _listMyPros;
-        public async void Generating(CancellationToken cancellationToken)
+        public async void Generating(CancellationToken cancellationToken)   //Генерация заданий.
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     _listMyPros.Add(new MyProcess());
-
-                    CheckRam();
                     await Task.Delay(1000);
                 }
             }
@@ -94,26 +117,58 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        private async void StartRamCheck(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    CheckRam();
+                    await Task.Delay(1);
+                }
+            }
+            catch (TaskCanceledException e)
+            {
+                MessageBox.Show($"Eroor:(TaskCanceledException) {e}");
+            }
+        }   //Старт проверки ОЗУ
+
+        public void StopRamCheck()
+        {
+            _cancellationTokenSource.Cancel();
+        } //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
+
         //Если хватает свободнлй памяти для задачи,
         //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
         public void CheckRam()
         {
-
-            while (_listMyPros.Count > 0)
+            if (_ram_ost > 0)
             {
-                var firstItem = _listMyPros.First();
-                if (_ram_ost >= firstItem.Ram)
+                while (_listMyPros.Count > 0)
                 {
-                    _Processes.Add(firstItem);
-                    _ram_ost -= firstItem.Ram;
-                    _listMyPros.Remove(firstItem);
-                }
-                else
-                {
-                    break;
+                    var firstItem = _listMyPros.First();
+                    if (_ram_ost >= firstItem.Ram)
+                    {
+                        _Processes.Add(firstItem);
+                        _ram_ost -= firstItem.Ram;
+                        _listMyPros.Remove(firstItem);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
-
+            else if (_ram_ost < 0)
+            {
+                var item = _Processes.Last();
+                if (item != null) //Если список выполняемых задач не пустой
+                {
+                    _listMyPros.Add(item);
+                    _ram_ost += item.Ram;
+                    _Processes.Remove(item);
+                }
+            }
         }
     }
 }

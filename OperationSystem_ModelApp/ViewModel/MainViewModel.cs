@@ -53,7 +53,7 @@ namespace OperationSystem_ModelApp.ViewModel
             IsVisableProperty = Visibility.Hidden;
             RamOS = 1024;
 
-            threadForOS = new Thread(new ThreadStart(operatingSystem.PlusTakt));
+            threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
             
         }
@@ -65,10 +65,19 @@ namespace OperationSystem_ModelApp.ViewModel
             while (true)
             {
                 Takt = operatingSystem.Takt;
-                operatingSystem.Ram = RamOS;
                 CountTasks = ProcessesOS.Count;
                 CountListTasks = operatingSystem._listMyPros.Count;
-                
+                RamOS_ostatok = operatingSystem.Ram_ost;
+                if (RamOS == 0) {
+                    IsVisableProperty = Visibility.Hidden;
+                }
+                else
+                {
+                    IsVisableProperty = Visibility.Visible;
+                }
+
+                if(operatingSystem.Ram!=RamOS)
+                    operatingSystem.Ram = RamOS;
             }
         }
         private bool IsGenerating
@@ -215,7 +224,8 @@ namespace OperationSystem_ModelApp.ViewModel
                         }
                         else
                         {
-                            //Просто обнуляем счетчик тактов
+                            RamOS = 1024;
+                            operatingSystem.Ram_ost = RamOS;
                             operatingSystem.Takt = 0;
                             ProcessesOS.Clear();
                         }
@@ -232,6 +242,7 @@ namespace OperationSystem_ModelApp.ViewModel
                     (addCommand = new RelayCommand(obj =>
                     {
                         operatingSystem.AddProcess();
+
                     }));
             }
         }
