@@ -27,7 +27,8 @@ namespace OperationSystem_ModelApp.Model
             _islast = islast;
             if (!_islast)
             {
-                var rndType = (NameTypeCommand)rnd.Next(1, 3);
+                //Рандомная задача
+                var rndType = (NameTypeCommand)rnd.Next(1, Enum.GetValues(typeof(NameTypeCommand)).Length);
                 TypeCmd = new TypeCommand(rndType);
             }
             else
@@ -36,7 +37,6 @@ namespace OperationSystem_ModelApp.Model
             }
         }
     }
-
     public enum NameTypeCommand { Close, IO, Arithmetic, IDK }
     public struct TypeCommand
     {
@@ -69,8 +69,8 @@ namespace OperationSystem_ModelApp.Model
                     sizeTypeCommand = 1;
                     break;
             }
-
-            Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
+            //Если надо посмотреть как генерируется
+            //Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
         }
         public TypeCommand()
         {

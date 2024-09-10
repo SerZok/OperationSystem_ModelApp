@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace OperationSystem_ModelApp.Model
         Running,
         Completed
     }
-    internal class MyProcess
+    internal class MyProcess: INotifyPropertyChanged
     {
         private Random rnd;
 
@@ -43,18 +44,29 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Состояние процесса (Готов, Выполняется, Завершен)
         /// </summary>
-        public ProcessState State { get; set; }
+        private ProcessState state;
+        public ProcessState State 
+        {
+            get => state;
+            set
+            {
+                state = value;
+                OnPropertyChanged("State");
+            }
+        }
+
         public MyProcess()
         {
             rnd = new Random();
             Commands = new List<Command>();
-            countCommands = rnd.Next(2, 5); //Максммум 30 комманд
+            countCommands = rnd.Next(2, 30); //Максммум 30 комманд
 
+            //Генерация команд
             for (int i = 1; i <= countCommands; i++)
             {
                 if (i==countCommands) //Последняя команда должна быть Завершающая (Close)
                 {
-                    var commandLast = new Command(true);
+                    var commandLast = new Command(true); //true -> Последняя
                     Commands.Add(commandLast);
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
@@ -63,7 +75,16 @@ namespace OperationSystem_ModelApp.Model
                 Ram += command.TypeCmd.sizeTypeCommand;
                 Commands.Add(command);
             }
+
+            State = ProcessState.Ready;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
     }
-    
 }

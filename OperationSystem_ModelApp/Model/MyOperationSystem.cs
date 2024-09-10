@@ -68,13 +68,18 @@ namespace OperationSystem_ModelApp.Model
         public List<MyProcess> _listMyPros;
 
         private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
+        private CancellationTokenSource _cancellationTokenSourceTasks;
         public MyOperationSystem()
         {
             _Processes = new ObservableCollection<MyProcess>();
             _listMyPros = new List<MyProcess>();
             _ram_ost = _ram;
             _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSourceTasks = new CancellationTokenSource();
+
+            StartLauncTask(_cancellationTokenSourceTasks.Token);
             StartRamCheck(_cancellationTokenSource.Token);
+
         }
 
         public void AddProcess()    //Добавляю процесс при нажитии на кнопку.
@@ -119,7 +124,46 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        //Страт проверки ОЗУ
+
+        private async void StartLauncTask(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested) {
+                    await LauncTask();
+                    await Task.Delay(3000);
+                }
+            }
+            catch (TaskCanceledException e)
+            {
+                MessageBox.Show($"Eroor:(TaskCanceledException in Task) {e}");
+            }
+        }
+
+        public async Task LauncTask()
+        {
+            while (_Processes.Any())
+            {
+                var proc = _Processes.First();
+                if (proc.State != ProcessState.Completed)
+                {
+                    await Task.Delay(1000);
+                    proc.State = ProcessState.Running;
+                    await Task.Delay(1000);
+                    proc.State = ProcessState.Completed;
+                    await Task.Delay(1000);
+                }
+
+                else
+                {
+                    _Processes.Remove(proc);
+                    break;
+                }
+
+            }
+        }
+
+        //Старт проверки ОЗУ
         private async void StartRamCheck(CancellationToken cancellationToken)
         {
             try
@@ -132,17 +176,18 @@ namespace OperationSystem_ModelApp.Model
             }
             catch (TaskCanceledException e)
             {
-                MessageBox.Show($"Eroor:(TaskCanceledException) {e}");
+                MessageBox.Show($"Eroor:(TaskCanceledException in RamCheck) {e}");
             }
-        }   
+        }
 
+        //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
         public void StopRamCheck()
         {
             _cancellationTokenSource.Cancel();
-        } //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
+        } 
 
         //Если хватает свободной памяти для задачи,
-        //то выгружаем из List и загружаем в ObservableCollection, т.е. там будут выполняться
+        //то выгружаем из List и загружаем в ObservableCollection
         public void CheckRam()
         {
             if (_ram_ost > 0)

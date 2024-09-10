@@ -54,7 +54,7 @@ namespace OperationSystem_ModelApp.ViewModel
         }
 
         public Random random;
-        public ObservableCollection<MyProcess> ProcessesOS { get; private set; }
+        public ObservableCollection<MyProcess> ProcessesOS { get;  set; }
         private void UpdateForUI() //Метод для обновления полей для отображения. Нужен для потока
         {
             while (true)
@@ -72,7 +72,6 @@ namespace OperationSystem_ModelApp.ViewModel
                 {
                     IsVisableProperty = Visibility.Visible;
                 }
-
                 if(operatingSystem.Ram!=RamOS)
                     operatingSystem.Ram = RamOS;
 
