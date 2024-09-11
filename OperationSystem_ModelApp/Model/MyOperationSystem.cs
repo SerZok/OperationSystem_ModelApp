@@ -7,10 +7,12 @@ using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
 using System.Windows;
 using System.Net.WebSockets;
+using System.Net.NetworkInformation;
 
 
 namespace OperationSystem_ModelApp.Model
 {
+    public enum CpuState { Waiting, Working }
     class MyOperationSystem
     {    /// <summary>
          /// Сколько тактов в 1 кванте;
@@ -19,7 +21,6 @@ namespace OperationSystem_ModelApp.Model
          /// </summary>
         public static int Kvant;
         public int Takt { get; set; }
-
         private int _ram = 1024;
         private int _ram_ost;
         public int Ram {
@@ -62,13 +63,15 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Скорость работы ОС
         /// </summary>
-        private int Speed;
+        private int Speed; //скорость тиков
 
         public ObservableCollection<MyProcess> _Processes;
         public List<MyProcess> _listMyPros;
 
+        public CpuState cpuState;
+
         private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
-        private CancellationTokenSource _cancellationTokenSourceTasks;
+        private CancellationTokenSource _cancellationTokenSourceTasks; //Для проверки запуска заданий
         public MyOperationSystem()
         {
             _Processes = new ObservableCollection<MyProcess>();
@@ -79,7 +82,13 @@ namespace OperationSystem_ModelApp.Model
 
             StartLauncTask(_cancellationTokenSourceTasks.Token);
             StartRamCheck(_cancellationTokenSource.Token);
+            cpuState = CpuState.Waiting;
 
+            Speed = 10;
+            T_next = 10;
+            T_IntiIO = 20;
+            T_IntrIO = 30;
+            T_Load = 10;
         }
 
         public void AddProcess()    //Добавляю процесс при нажитии на кнопку.
@@ -105,8 +114,13 @@ namespace OperationSystem_ModelApp.Model
             while (true)
             {
                 Takt++;
-                Thread.Sleep(100);
+                Thread.Sleep(Speed);
             }
+        }
+
+        public int ConvertTaktToMillisec(int takt)
+        {
+            return takt * Speed;
         }
         public async void Generating(CancellationToken cancellationToken)   //Генерация заданий.
         {
@@ -123,15 +137,13 @@ namespace OperationSystem_ModelApp.Model
                 MessageBox.Show($"Generating error:(TaskCanceledException) {e}");
             }
         }
-
-
         private async void StartLauncTask(CancellationToken cancellationToken)
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested) {
                     await LauncTask();
-                    await Task.Delay(3000);
+                    await Task.Delay(100);
                 }
             }
             catch (TaskCanceledException e)
@@ -140,6 +152,7 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        //Запустить задание, если есть (Мб это планировщик)
         public async Task LauncTask()
         {
             while (_Processes.Any())
@@ -147,19 +160,20 @@ namespace OperationSystem_ModelApp.Model
                 var proc = _Processes.First();
                 if (proc.State != ProcessState.Completed)
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(ConvertTaktToMillisec(T_Load));
+                    cpuState = CpuState.Working;
+                    await Task.Delay(ConvertTaktToMillisec(T_next));
                     proc.State = ProcessState.Running;
-                    await Task.Delay(1000);
+                    await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
                     proc.State = ProcessState.Completed;
-                    await Task.Delay(1000);
+                    await Task.Delay(ConvertTaktToMillisec(T_Load));
                 }
-
                 else
                 {
-                    _Processes.Remove(proc);
+                    cpuState = CpuState.Waiting;
+                    RemoveProcess(proc);
                     break;
                 }
-
             }
         }
 
@@ -179,12 +193,6 @@ namespace OperationSystem_ModelApp.Model
                 MessageBox.Show($"Eroor:(TaskCanceledException in RamCheck) {e}");
             }
         }
-
-        //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
-        public void StopRamCheck()
-        {
-            _cancellationTokenSource.Cancel();
-        } 
 
         //Если хватает свободной памяти для задачи,
         //то выгружаем из List и загружаем в ObservableCollection
@@ -217,6 +225,12 @@ namespace OperationSystem_ModelApp.Model
                     _Processes.Remove(item);
                 }
             }
+        }
+
+        //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
+        public void StopRamCheck()
+        {
+            _cancellationTokenSource.Cancel();
         }
     }
 }

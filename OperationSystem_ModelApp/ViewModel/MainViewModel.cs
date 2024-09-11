@@ -37,6 +37,9 @@ namespace OperationSystem_ModelApp.ViewModel
         private CancellationTokenSource cancellationTokenSource; //Для корректной работы генератора заданий
         private Stopwatch _stopwatch;
         private string _strTimeOS;
+        private string cpu_State;
+        private readonly object lockObject;
+
 
         public MainViewModel()
         {
@@ -45,9 +48,11 @@ namespace OperationSystem_ModelApp.ViewModel
             ProcessesOS = operatingSystem._Processes;
             IsGenerating = false;
             IsVisableProperty = Visibility.Hidden;
+            lockObject = new object();
+
             RamOS = 1024;
             kvant = 40;
-
+            
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
             
@@ -55,7 +60,9 @@ namespace OperationSystem_ModelApp.ViewModel
 
         public Random random;
         public ObservableCollection<MyProcess> ProcessesOS { get;  set; }
-        private void UpdateForUI() //Метод для обновления полей для отображения. Нужен для потока
+
+        //Метод для обновления полей для отображения. Нужен для потока
+        private void UpdateForUI()
         {
             while (true)
             {
@@ -64,14 +71,13 @@ namespace OperationSystem_ModelApp.ViewModel
                 CountListTasks = operatingSystem._listMyPros.Count;
                 RamOS_ostatok = operatingSystem.Ram_ost;
                 StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
+                CPU_State ="Состояние ЦП: "+ Enum.GetName(typeof(CpuState), operatingSystem.cpuState);
 
-                if (RamOS == 0) {
+                if (RamOS == 0)
                     IsVisableProperty = Visibility.Hidden;
-                }
                 else
-                {
                     IsVisableProperty = Visibility.Visible;
-                }
+
                 if(operatingSystem.Ram!=RamOS)
                     operatingSystem.Ram = RamOS;
 
@@ -139,6 +145,18 @@ namespace OperationSystem_ModelApp.ViewModel
                 {
                     _strTimeOS = value;
                     OnPropertyChanged("StrTimeOS");
+                }
+            }
+        }
+        public string CPU_State
+        {
+            get => cpu_State;
+            set
+            {
+                if (cpu_State != value)
+                {
+                    cpu_State = value;
+                    OnPropertyChanged("CPU_State");
                 }
             }
         }
@@ -210,9 +228,14 @@ namespace OperationSystem_ModelApp.ViewModel
             get
             {
                 return autoAddTask ??
-                    (autoAddTask = new RelayCommand(obj =>
-                    {
-                        IsGenerating = true;
+                    (autoAddTask = new RelayCommand(obj =>{
+                        lock (lockObject)
+                        {
+                            if (!isGenerating)
+                            {
+                                IsGenerating = true; // Запускаем задачу
+                            }
+                        }
                     }));
             }
         }
@@ -221,9 +244,14 @@ namespace OperationSystem_ModelApp.ViewModel
             get
             {
                 return offAutoAddTask ??
-                    (offAutoAddTask = new RelayCommand(obj =>
-                    {
-                        IsGenerating = false;
+                    (offAutoAddTask = new RelayCommand(obj =>{
+                        lock (lockObject) //Чтоб не было гонки на переключатель
+                        {
+                            if (isGenerating)
+                            {
+                                IsGenerating = false; // Останавливаем задачу
+                            }
+                        }
                     }));
             }
         }
