@@ -39,7 +39,21 @@ namespace OperationSystem_ModelApp.ViewModel
         private string _strTimeOS;
         private string cpu_State;
         private readonly object lockObject;
+        private int speedOS;
+        private int numToBeCreate;
 
+        public int NumToBeCreate
+        {
+            get => numToBeCreate;
+            set
+            {
+                if (value != numToBeCreate)
+                {
+                    numToBeCreate = value;
+                    OnPropertyChanged("NumToBeCreate");
+                }
+            }
+        }
 
         public MainViewModel()
         {
@@ -52,6 +66,7 @@ namespace OperationSystem_ModelApp.ViewModel
 
             RamOS = 1024;
             kvant = 40;
+            SpeedOS = 500;
             
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
@@ -83,6 +98,8 @@ namespace OperationSystem_ModelApp.ViewModel
 
                 if (MyOperationSystem.Kvant != Kvant)
                     MyOperationSystem.Kvant = Kvant;
+
+                operatingSystem.Speed = SpeedOS;
             }
         }
         private bool IsGenerating
@@ -101,6 +118,18 @@ namespace OperationSystem_ModelApp.ViewModel
                 else
                 {
                     cancellationTokenSource?.Cancel();
+                }
+            }
+        }
+        public int SpeedOS
+        {
+            get => speedOS;
+            set
+            {
+                if (speedOS != value)
+                {
+                    speedOS = value;
+                    OnPropertyChanged("SpeedOS");
                 }
             }
         }
@@ -210,7 +239,6 @@ namespace OperationSystem_ModelApp.ViewModel
                 }
             }
         }
-
         public int CountListTasks
         {
             get { return _countListTasks; }
@@ -293,8 +321,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 return addCommand ??
                     (addCommand = new RelayCommand(obj =>
                     {
-                        operatingSystem.AddProcess();
-
+                        operatingSystem.AddProcess(NumToBeCreate);
                     }));
             }
         }

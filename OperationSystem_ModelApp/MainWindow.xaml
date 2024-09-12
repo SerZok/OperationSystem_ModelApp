@@ -30,7 +30,10 @@
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             
+            <!--Кнопка запуска ОС-->
             <Button Content="Запустить ОС" Command="{Binding StartOS}" Margin="10"  />
+            
+            <!--Нижняя панель (не отображается ,если не запущена ОС)-->
             <Grid Grid.RowSpan="2"  Visibility="{Binding IsVisableProperty}" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
@@ -43,7 +46,7 @@
 
                 <Grid  Grid.Row="1" Background="#FF9D9D9B">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                     </Grid.RowDefinitions>
@@ -52,13 +55,31 @@
                         <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <Button  Content="Загрузить новое задание" Command="{Binding ADDCommand}" Margin="10" Grid.ColumnSpan="2"/>
+                    <Grid Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Button xml:space="preserve" Content="Загрузить &#13;новое задание" Command="{Binding ADDCommand}"  Margin="5" />
+                        <StackPanel Grid.Column="1" DockPanel.Dock="Right" Margin="5" Width="Auto">
+                            <Label Content="Кол-во комманд"/>
+                            <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="{Binding NumToBeCreate}" Height="30"/>
+                        </StackPanel>
+                    </Grid>
                     <Label Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Авто-генерация "/>
                     <RadioButton  Grid.Column="0" Grid.Row="2" Content="Включить"  VerticalAlignment="Top" HorizontalAlignment="Center" Command="{Binding AutoAddTask}"/>
                     <RadioButton Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
                 </Grid>
 
                 <Button Grid.Row="2" Content="Уничтожить выбранный процесс" Command="{Binding DelTask}" Margin="10"/>
+                
+                <!--Скорость работы ОС -->
+                <DockPanel Grid.Row="3" Background="#444">
+                    <Label DockPanel.Dock="Top" Content="Скорость работы ОС" HorizontalContentAlignment="Center" Foreground="White"/>
+                    <Label DockPanel.Dock="Left" Content="0.001 сек" VerticalAlignment="Center" Foreground="White"/>
+                    <Label DockPanel.Dock="Right" Content="1 сек" VerticalAlignment="Center" Foreground="White"/>
+                    <Slider  TickPlacement="BottomRight" TickFrequency="250" Maximum="1000" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
+                </DockPanel>
 
                 <Button Grid.Row="5" Content="Выполнить все процессы &#x0a; и выключить ОС" Command="{Binding ADDCommand}" Margin="10" />
             </Grid>
@@ -105,8 +126,8 @@
                 </Style>
             </Grid.Resources>
 
-            <!--Скорость моделирования (возможно сделать в виде ползунка)-->
-            <Grid Name="Speed" Margin="5" Background="#909090">
+            <!--Остаток ОЗУ-->
+            <Grid Margin="5" Background="#909090">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>

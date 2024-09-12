@@ -63,7 +63,7 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Скорость работы ОС
         /// </summary>
-        private int Speed; //скорость тиков
+        public int Speed { get; set; } //скорость тиков
 
         public ObservableCollection<MyProcess> _Processes;
         public List<MyProcess> _listMyPros;
@@ -84,26 +84,36 @@ namespace OperationSystem_ModelApp.Model
             StartRamCheck(_cancellationTokenSource.Token);
             cpuState = CpuState.Waiting;
 
-            Speed = 10;
+            Speed = 500;
             T_next = 10;
             T_IntiIO = 20;
             T_IntrIO = 30;
             T_Load = 10;
+
         }
 
-        public void AddProcess()    //Добавляю процесс при нажитии на кнопку.
+        public void AddProcess(int CountCommand)
         {
-            var proc = new MyProcess();
+            MyProcess proc;
+            if (CountCommand < 2)
+            {
+                MessageBox.Show("Для задачи нужно как минимум 2 команды.\nЗадание будет сгенерировано со случайным набором команд","Ошибка",MessageBoxButton.OK, MessageBoxImage.Error);
+                proc = new MyProcess();
+            }
+            else
+                proc = new MyProcess(CountCommand);
+
             if (_ram_ost >= proc.Ram)
             {
                 _Processes.Add(proc);
-                _ram_ost-= proc.Ram;
+                _ram_ost -= proc.Ram;
             }
             else
             {
                 _listMyPros.Add(proc);
             }
         }
+
         public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection выбранный процесс
         {
             _Processes.Remove(proc);
@@ -166,7 +176,6 @@ namespace OperationSystem_ModelApp.Model
                     proc.State = ProcessState.Running;
                     await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
                     proc.State = ProcessState.Completed;
-                    await Task.Delay(ConvertTaktToMillisec(T_Load));
                 }
                 else
                 {

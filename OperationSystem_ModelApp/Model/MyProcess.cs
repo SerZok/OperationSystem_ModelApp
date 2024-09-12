@@ -18,7 +18,7 @@ namespace OperationSystem_ModelApp.Model
     }
     internal class MyProcess: INotifyPropertyChanged
     {
-        private Random rnd;
+        private Random rnd = new Random();
 
         private static int id = 0;
         /// <summary>
@@ -30,7 +30,7 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Список команд, которые надо выполнить
         /// </summary>
-        public List<Command> Commands { get; set; }
+        public List<Command> Commands { get; set; } = new List<Command>();
 
         private int countCommands;
         public int Id
@@ -57,8 +57,7 @@ namespace OperationSystem_ModelApp.Model
 
         public MyProcess()
         {
-            rnd = new Random();
-            Commands = new List<Command>();
+            
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
 
             //Генерация команд
@@ -77,6 +76,25 @@ namespace OperationSystem_ModelApp.Model
             }
 
             State = ProcessState.Ready;
+        }
+
+        public MyProcess(int countCom)
+        {
+            countCommands = countCom;
+            //Генерация команд
+            for (int i = 1; i <= countCommands; i++)
+            {
+                if (i == countCommands) //Последняя команда должна быть Завершающая (Close)
+                {
+                    var commandLast = new Command(true); //true -> Последняя
+                    Commands.Add(commandLast);
+                    Ram += commandLast.TypeCmd.sizeTypeCommand;
+                    break;
+                }
+                var command = new Command(false);
+                Ram += command.TypeCmd.sizeTypeCommand;
+                Commands.Add(command);
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

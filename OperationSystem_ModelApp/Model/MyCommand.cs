@@ -51,7 +51,7 @@ namespace OperationSystem_ModelApp.Model
             {
                 case NameTypeCommand.Close:
                     timeTypeCommand = 0;
-                    sizeTypeCommand = 1;
+                    sizeTypeCommand = 0;
                     break;
 
                 case NameTypeCommand.IO:
