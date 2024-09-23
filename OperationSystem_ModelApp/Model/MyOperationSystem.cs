@@ -73,14 +73,20 @@ namespace OperationSystem_ModelApp.Model
 
         private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
         private CancellationTokenSource _cancellationTokenSourceTasks; //Для проверки запуска заданий
+        private Thread _ioThread;
+        private readonly object _lock = new object();
         public MyOperationSystem()
         {
+            _ioThread = new Thread(InOut);
+            
+
             _Processes = new ObservableCollection<MyProcess>();
             _listMyPros = new ObservableCollection<MyProcess>();
             _ram_ost = _ram;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationTokenSourceTasks = new CancellationTokenSource();
             IOList = new List<int>();
+
 
             StartLauncTask(_cancellationTokenSourceTasks.Token);
             StartRamCheck(_cancellationTokenSource.Token);
@@ -103,21 +109,27 @@ namespace OperationSystem_ModelApp.Model
             }
             else
                 proc = new MyProcess(CountCommand);
+            lock (_lock)
+            {
+                if (_ram_ost >= proc.Ram)
+                {
+                    _Processes.Add(proc);
+                    _ram_ost -= proc.Ram;
+                }
+                else
+                {
+                    _listMyPros.Add(proc);
+                }
+            }
 
-            if (_ram_ost >= proc.Ram)
-            {
-                _Processes.Add(proc);
-                _ram_ost -= proc.Ram;
-            }
-            else
-            {
-                _listMyPros.Add(proc);
-            }
         }
         public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection выбранный процесс
         {
-            _Processes.Remove(proc);
-            _ram_ost += proc.Ram;
+            lock (_lock)
+            {
+                _Processes.Remove(proc);
+                _ram_ost += proc.Ram;
+            }
         }
         public void CountTakt() //Счетчик тактов
         {
@@ -137,8 +149,11 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    _listMyPros.Add(new MyProcess());
-                    await Task.Delay(1000);
+                    lock (_lock)
+                    {
+                        _listMyPros.Add(new MyProcess());
+                    }
+                    await Task.Delay(1000, cancellationToken);
                 }
             }
             catch(TaskCanceledException e)
@@ -152,7 +167,6 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested) {
                     await LauncTask();
-                    
                     await Task.Delay(100);
                 }
             }
@@ -167,66 +181,92 @@ namespace OperationSystem_ModelApp.Model
         //Если процесс InputOutput, то надо следующую задачу
         public async Task LauncTask()
         {
+            
             while (_Processes.Any())
             {
-                var proc = _Processes.First();
-                if (proc.State != ProcessState.Completed) //Если выполнено, то надо убрать задачу
+                //Загрузка задачи
+                cpuState = CpuState.Working;
+                await Task.Delay(ConvertTaktToMillisec(T_Load));
+
+                for (int i = 0; i<_Processes.Count;i++)
                 {
-                    cpuState = CpuState.Working;
-
-                    //Добавить в очередь на обработку?
-                    //Выполнять 1 квант (Kavnt-=takt)
-
-                    while (proc.Commands.Any()) //Выполнение команд
+                    var proc = _Processes[i];
+                    if (proc.State == ProcessState.InputOutput)
                     {
-                        proc.State = ProcessState.Running;
-                        await Task.Delay(ConvertTaktToMillisec(T_Load));
-                        var fCommand = proc.Commands.First();
+                        continue;
+                    }
 
-                        //Если комманда IO
-                        if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
+                    //Выполнять 1 квант (Kavnt-=takt)
+                    if (proc.State != ProcessState.Completed) //Если не завершена задача
+                    {
+                        //Запуск задачи
+                        await Task.Delay(ConvertTaktToMillisec(T_next));
+                        //Выполнение команд
+                        while (proc.Commands.Any())
                         {
-                            IOList.Add(proc.Id + 1); //Добавляем ID задачи в список, которые обрабатываю IO
-                            proc.State = ProcessState.InputOutput;
-                            await InOut();
-                            cpuState = CpuState.Working;
+                            var fCommand = proc.Commands.First();
+                            //Если комманда IO
+                            if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
+                            {
+                                IOList.Add(proc.Id + 1); //Добавляем ID задачи в список, которые обрабатываю IO
+                                proc.State = ProcessState.InputOutput;
+                                if (_ioThread.ThreadState==ThreadState.Unstarted)
+                                    _ioThread.Start();
+                                break;
+
+                            }
+                            else //Если команда не IO
+                            {
+                                proc.State = ProcessState.Running;
+                                await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                                proc.Commands.Remove(fCommand);
+                            }
                         }
-                        else //Если команда не IO, то выполняем задачу
-                        {
-                            await Task.Delay(ConvertTaktToMillisec(T_next));
 
-                            //Выполнение команды
-                            await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
-                            proc.Commands.Remove(fCommand);
-                            proc.State = ProcessState.Completed;
+                        if (!proc.Commands.Any())
+                        {
+                            proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если команды кончились
+                            break;
                         }
                     }
-                }
-                else
-                {
-                    RemoveProcess(proc);
-                    cpuState = CpuState.Waiting;
-                    break;
+                    else //Задача завершена
+                    {
+                        RemoveProcess(proc);
+                        i--;
+                        cpuState = CpuState.Waiting;
+                        break;
+                    }
                 }
             }
         }
 
-        private async Task InOut()
+        private void InOut()
         {
-            while (IOList.Any() && _Processes.Any())
+            lock (_Processes)
             {
-                cpuState = CpuState.Waiting;
-
-                var id = IOList.First();
-                var proc = _Processes.FirstOrDefault(x => x.Id==id);
-                if (proc != null)
+                while (IOList.Any() && _Processes.Any())
                 {
-                    await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
-                    proc.Commands.Remove(proc.Commands.First());
-                    IOList.Remove(id);
-                }
-            }
+                    cpuState = CpuState.Waiting;
 
+                    var id = IOList.First();
+                    var proc = _Processes.FirstOrDefault(x => x.Id == id);
+                    if (proc != null)
+                    {
+                        //await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
+                        Thread.Sleep(ConvertTaktToMillisec(T_IntiIO));
+                        proc.Commands.Remove(proc.Commands.First());
+
+                        // Если есть еще команды, процесс снова переходит в состояние Running
+                        if (proc.Commands.Any())
+                            proc.State = ProcessState.Running;
+                        else
+                            proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если все команды завершены
+
+                        IOList.Remove(id);
+                    }
+                }
+                cpuState = CpuState.Working;
+            }
         }
 
         //Старт проверки ОЗУ

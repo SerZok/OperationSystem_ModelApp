@@ -39,8 +39,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -160,7 +160,6 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Grid.Resources>
@@ -207,15 +206,6 @@
                 </Grid.RowDefinitions>
                 <Label Content="Задачи в ОС"  Style="{StaticResource LabelAlign}"/>
                 <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding CountTasks}" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
-            </Grid>
-
-            <Grid Grid.Column="3" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Content="Время работы ОС" Style="{StaticResource LabelAlign}"/>
-                <TextBox Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
             <Grid Grid.Column="4" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">

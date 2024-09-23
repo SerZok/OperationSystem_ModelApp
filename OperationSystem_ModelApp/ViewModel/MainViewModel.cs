@@ -117,8 +117,8 @@ namespace OperationSystem_ModelApp.ViewModel
             threadForUI = new Thread(UpdateForUI);
 
             T_next = 2;
-            T_IntiIO = 60;
-            T_IntrIO = 60;
+            T_IntiIO = 30;
+            T_IntrIO = 40;
             T_Load = 4;
         }
 
