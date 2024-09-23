@@ -41,24 +41,24 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Такты для запуска задачи
         /// </summary>
-        private int T_next;
+        public int T_next;
 
         /// <summary>
         /// Затраты ОС на изменение состояния процесса	
         /// по обращению ко вводу(выводу) (в числе тактов)
         /// </summary>
-        private int T_IntiIO;
+        public int T_IntiIO;
 
         /// <summary>
         ///  Затраты ОС по обслуживанию сигнала окончания T_IntrIO
         ///  (прерывания) ввода(вывода) (в числе тактов)
         /// </summary>
-        private int T_IntrIO;
+        public int T_IntrIO;
 
         /// <summary>
         /// Число тактов на загрузку нового задания
         /// </summary>
-        private int T_Load;
+        public int T_Load;
 
         /// <summary>
         /// Скорость работы ОС
@@ -66,7 +66,8 @@ namespace OperationSystem_ModelApp.Model
         public int Speed { get; set; } //скорость тиков
 
         public ObservableCollection<MyProcess> _Processes;
-        public List<MyProcess> _listMyPros;
+        public ObservableCollection<MyProcess> _listMyPros;
+        public List<int> IOList;
 
         public CpuState cpuState;
 
@@ -75,21 +76,21 @@ namespace OperationSystem_ModelApp.Model
         public MyOperationSystem()
         {
             _Processes = new ObservableCollection<MyProcess>();
-            _listMyPros = new List<MyProcess>();
+            _listMyPros = new ObservableCollection<MyProcess>();
             _ram_ost = _ram;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationTokenSourceTasks = new CancellationTokenSource();
+            IOList = new List<int>();
 
             StartLauncTask(_cancellationTokenSourceTasks.Token);
             StartRamCheck(_cancellationTokenSource.Token);
             cpuState = CpuState.Waiting;
 
-            Speed = 500;
-            T_next = 10;
-            T_IntiIO = 20;
-            T_IntrIO = 30;
-            T_Load = 10;
-
+            Speed = 250;
+            T_next      = 1;
+            T_IntiIO    = 60; //Желательно чтоб было дольше самого кванта
+            T_IntrIO    = 3;
+            T_Load      = 4;
         }
 
         public void AddProcess(int CountCommand)
@@ -113,7 +114,6 @@ namespace OperationSystem_ModelApp.Model
                 _listMyPros.Add(proc);
             }
         }
-
         public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection выбранный процесс
         {
             _Processes.Remove(proc);
@@ -127,7 +127,6 @@ namespace OperationSystem_ModelApp.Model
                 Thread.Sleep(Speed);
             }
         }
-
         public int ConvertTaktToMillisec(int takt)
         {
             return takt * Speed;
@@ -153,6 +152,7 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested) {
                     await LauncTask();
+                    
                     await Task.Delay(100);
                 }
             }
@@ -163,27 +163,70 @@ namespace OperationSystem_ModelApp.Model
         }
 
         //Запустить задание, если есть (Мб это планировщик)
+        //Надо сделать:
+        //Если процесс InputOutput, то надо следующую задачу
         public async Task LauncTask()
         {
             while (_Processes.Any())
             {
                 var proc = _Processes.First();
-                if (proc.State != ProcessState.Completed)
+                if (proc.State != ProcessState.Completed) //Если выполнено, то надо убрать задачу
                 {
-                    await Task.Delay(ConvertTaktToMillisec(T_Load));
                     cpuState = CpuState.Working;
-                    await Task.Delay(ConvertTaktToMillisec(T_next));
-                    proc.State = ProcessState.Running;
-                    await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
-                    proc.State = ProcessState.Completed;
+
+                    //Добавить в очередь на обработку?
+                    //Выполнять 1 квант (Kavnt-=takt)
+
+                    while (proc.Commands.Any()) //Выполнение команд
+                    {
+                        proc.State = ProcessState.Running;
+                        await Task.Delay(ConvertTaktToMillisec(T_Load));
+                        var fCommand = proc.Commands.First();
+
+                        //Если комманда IO
+                        if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
+                        {
+                            IOList.Add(proc.Id + 1); //Добавляем ID задачи в список, которые обрабатываю IO
+                            proc.State = ProcessState.InputOutput;
+                            await InOut();
+                            cpuState = CpuState.Working;
+                        }
+                        else //Если команда не IO, то выполняем задачу
+                        {
+                            await Task.Delay(ConvertTaktToMillisec(T_next));
+
+                            //Выполнение команды
+                            await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                            proc.Commands.Remove(fCommand);
+                            proc.State = ProcessState.Completed;
+                        }
+                    }
                 }
                 else
                 {
-                    cpuState = CpuState.Waiting;
                     RemoveProcess(proc);
+                    cpuState = CpuState.Waiting;
                     break;
                 }
             }
+        }
+
+        private async Task InOut()
+        {
+            while (IOList.Any() && _Processes.Any())
+            {
+                cpuState = CpuState.Waiting;
+
+                var id = IOList.First();
+                var proc = _Processes.FirstOrDefault(x => x.Id==id);
+                if (proc != null)
+                {
+                    await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
+                    proc.Commands.Remove(proc.Commands.First());
+                    IOList.Remove(id);
+                }
+            }
+
         }
 
         //Старт проверки ОЗУ
@@ -205,9 +248,10 @@ namespace OperationSystem_ModelApp.Model
 
         //Если хватает свободной памяти для задачи,
         //то выгружаем из List и загружаем в ObservableCollection
+        //+ если процессор ожидает.
         public void CheckRam()
         {
-            if (_ram_ost > 0)
+            if (_ram_ost > 0 && cpuState == CpuState.Waiting)
             {
                 while (_listMyPros.Count > 0)
                 {
@@ -234,12 +278,6 @@ namespace OperationSystem_ModelApp.Model
                     _Processes.Remove(item);
                 }
             }
-        }
-
-        //Прекратить  проверять ОЗУ (Может быть полезно в будущем)
-        public void StopRamCheck()
-        {
-            _cancellationTokenSource.Cancel();
         }
     }
 }

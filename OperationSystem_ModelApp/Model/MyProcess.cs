@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
@@ -14,7 +15,9 @@ namespace OperationSystem_ModelApp.Model
     {
         Ready,
         Running,
-        Completed
+        Completed,
+        InputOutput,
+        Pause
     }
     internal class MyProcess: INotifyPropertyChanged
     {
@@ -30,7 +33,7 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Список команд, которые надо выполнить
         /// </summary>
-        public List<Command> Commands { get; set; } = new List<Command>();
+        public ObservableCollection<Command> Commands { get; set; } = new ObservableCollection<Command>();
 
         private int countCommands;
         public int Id
@@ -40,6 +43,7 @@ namespace OperationSystem_ModelApp.Model
                 return id++;
             }
         }
+
 
         /// <summary>
         /// Состояние процесса (Готов, Выполняется, Завершен)
@@ -57,9 +61,7 @@ namespace OperationSystem_ModelApp.Model
 
         public MyProcess()
         {
-            
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
-
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
             {
@@ -81,6 +83,7 @@ namespace OperationSystem_ModelApp.Model
         public MyProcess(int countCom)
         {
             countCommands = countCom;
+            Debug.WriteLine($"*********Task #{id} **********");
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
             {

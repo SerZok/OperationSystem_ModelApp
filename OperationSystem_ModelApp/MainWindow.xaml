@@ -8,14 +8,15 @@
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="MainWindow" Height="720" Width="1080">
+        Title="Модель ОС (FIFO)" Height="720" Width="1080"
+        WindowStartupLocation="CenterScreen"
+        >
 
 
     <Grid Background="#444">
-
         <Grid.RowDefinitions>
             <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -29,10 +30,10 @@
                 <RowDefinition Height="50"></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            
+
             <!--Кнопка запуска ОС-->
             <Button Content="Запустить ОС" Command="{Binding StartOS}" Margin="10"  />
-            
+
             <!--Нижняя панель (не отображается ,если не запущена ОС)-->
             <Grid Grid.RowSpan="2"  Visibility="{Binding IsVisableProperty}" >
                 <Grid.RowDefinitions>
@@ -40,11 +41,25 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="50"></RowDefinition>
                     <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition ></RowDefinition>
-                    <RowDefinition></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <Grid  Grid.Row="1" Background="#FF9D9D9B">
+                <!--Стили-->
+                <Grid.Resources>
+                    <Style x:Key="LabelAlign" TargetType="Label">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                    <Style x:Key="TextBoxAlign" TargetType="TextBox">
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Grid.Resources>
+
+                <Grid  Grid.Row="1" Background="#FF77C9BA">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
@@ -71,20 +86,55 @@
                     <RadioButton Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
                 </Grid>
 
-                <Button Grid.Row="2" Content="Уничтожить выбранный процесс" Command="{Binding DelTask}" Margin="10"/>
-                
+                <Button Grid.Row="2" Content="Уничтожить выбранный процесс" Command="{Binding DelTask}" Margin="5"/>
+
                 <!--Скорость работы ОС -->
-                <DockPanel Grid.Row="3" Background="#444">
+                <DockPanel Grid.Row="3">
                     <Label DockPanel.Dock="Top" Content="Скорость работы ОС" HorizontalContentAlignment="Center" Foreground="White"/>
-                    <Label DockPanel.Dock="Left" Content="0.001 сек" VerticalAlignment="Center" Foreground="White"/>
+                    <Label DockPanel.Dock="Left" Content="1 мс" VerticalAlignment="Center" Foreground="White"/>
                     <Label DockPanel.Dock="Right" Content="1 сек" VerticalAlignment="Center" Foreground="White"/>
                     <Slider  TickPlacement="BottomRight" TickFrequency="250" Maximum="1000" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
                 </DockPanel>
 
-                <Button Grid.Row="5" Content="Выполнить все процессы &#x0a; и выключить ОС" Command="{Binding ADDCommand}" Margin="10" />
+                <!--Параметры-->
+                <Grid Grid.Row="4" Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="100"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Column="0" Content="Память (Kb)" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}"/>
+
+                    <Label Grid.Column="0" Grid.Row="1" Content="T_next" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding T_next}" Style="{StaticResource TextBoxAlign}"/>
+
+                    <Label Grid.Column="0" Grid.Row="2" Content="T_InitIO" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding T_IntiIO}" Style="{StaticResource TextBoxAlign}"/>
+
+                    <Label Grid.Column="0" Grid.Row="3" Content="T_IntrIO" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding T_IntrIO}" Style="{StaticResource TextBoxAlign}"/>
+
+                    <Label Grid.Column="0" Grid.Row="4" Content="T_Load" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding T_Load}" Style="{StaticResource TextBoxAlign}"/>
+
+                    <Label Grid.Column="0" Grid.Row="5" Content="Квант" Style="{StaticResource LabelAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding Kvant}" Style="{StaticResource TextBoxAlign}"/>
+                </Grid>
+
+                <Button Grid.Row="5" Content="Применить изменения" Height="35"/>
+                <Button Grid.Row="6" Content="Выполнить все процессы &#x0a; и выключить ОС" Command="{Binding StopOS}" Margin="10" />
             </Grid>
         </Grid>
-        
+
         <!--Консоль/TaskBar-->
         <TabControl Grid.Row="1" Grid.Column="1" >
             <TabItem Header="TaskBar">
@@ -102,11 +152,10 @@
             </TabItem>
         </TabControl>
 
+
         <!--Параметры (верхние панельки)-->
         <Grid Grid.ColumnSpan="2" Background="#707070" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -125,9 +174,13 @@
                     <Setter Property="VerticalContentAlignment" Value="Center" />
                 </Style>
             </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
             <!--Остаток ОЗУ-->
-            <Grid Margin="5" Background="#909090">
+            <Grid Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -136,18 +189,8 @@
                 <TextBox Text="{Binding RamOS_ostatok}" Grid.Row="1" IsReadOnly="True" TextAlignment="Center" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
-            <!--Количество RAM у OS-->
-            <Grid Grid.Column="1" Margin="5" Background="#909090">
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Content="Память (Kb)" Style="{StaticResource LabelAlign}"/>
-                <TextBox Grid.Row="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}"/>
-            </Grid>
-
             <!--Количество сгенеированных задач-->
-            <Grid Grid.Column="2" Margin="5" Background="#909090">
+            <Grid Grid.Column="1" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -157,7 +200,7 @@
             </Grid>
 
             <!--Количество задач в загрузке мб-->
-            <Grid Grid.Column="3" Margin="5" Background="#909090">
+            <Grid Grid.Column="2" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -166,7 +209,7 @@
                 <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding CountTasks}" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
-            <Grid Grid.Column="4" Margin="5" Background="#909090">
+            <Grid Grid.Column="3" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -175,16 +218,15 @@
                 <TextBox Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
-            <Grid Grid.Column="5" Margin="5" Background="#909090">
+            <Grid Grid.Column="4" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Квант" Style="{StaticResource LabelAlign}"/>
-                <TextBox Text="{Binding Kvant}" Grid.Row="1" Style="{StaticResource TextBoxAlign}"/>
+
             </Grid>
 
-            <Grid Grid.Column="6" Margin="5" Background="#909090">
+            <Grid Grid.Column="5" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -200,7 +242,7 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" TextAlignment="Right" Margin="0,10,20,0" Text="{Binding CPU_State}"/>
+            <TextBlock Grid.Column="0" TextAlignment="Left" Margin="20,10,0,0" Text="{Binding CPU_State}"/>
             <TextBlock Grid.Column="1" TextAlignment="Right" Margin="0,10,20,0" Text="{Binding StrTimeOS}"/>
         </Grid>
     </Grid>

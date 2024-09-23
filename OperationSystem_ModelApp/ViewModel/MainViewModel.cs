@@ -41,16 +41,61 @@ namespace OperationSystem_ModelApp.ViewModel
         private readonly object lockObject;
         private int speedOS;
         private int numToBeCreate;
+        private RelayCommand stopOS;
 
-        public int NumToBeCreate
+        private int t_next;
+        private int t_IntiIO;
+        private int t_IntrIO;
+        private int t_Load;
+
+        public int T_next
         {
-            get => numToBeCreate;
+            get => t_next;
             set
             {
-                if (value != numToBeCreate)
+                if (t_next != value)
                 {
-                    numToBeCreate = value;
-                    OnPropertyChanged("NumToBeCreate");
+                    t_next = value;
+                    OnPropertyChanged("T_next");
+                }
+            }
+        }
+
+        public int T_IntiIO
+        {
+            get => t_IntiIO;
+            set
+            {
+                if (t_IntiIO != value)
+                {
+                    t_IntiIO = value;
+                    OnPropertyChanged("T_IntiIO");
+                }
+            }
+        }
+
+        public int T_IntrIO
+        {
+            get => t_IntrIO;
+            set
+            {
+                if (t_IntrIO != value)
+                {
+                    t_IntrIO = value;
+                    OnPropertyChanged("T_IntrIO");
+                }
+            }
+        }
+
+        public int T_Load
+        {
+            get => t_Load;
+            set
+            {
+                if (t_Load != value)
+                {
+                    t_Load = value;
+                    OnPropertyChanged("T_Load");
                 }
             }
         }
@@ -66,11 +111,15 @@ namespace OperationSystem_ModelApp.ViewModel
 
             RamOS = 1024;
             kvant = 40;
-            SpeedOS = 500;
+            SpeedOS = 250;
             
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
-            
+
+            T_next = 2;
+            T_IntiIO = 60;
+            T_IntrIO = 60;
+            T_Load = 4;
         }
 
         public Random random;
@@ -100,6 +149,12 @@ namespace OperationSystem_ModelApp.ViewModel
                     MyOperationSystem.Kvant = Kvant;
 
                 operatingSystem.Speed = SpeedOS;
+
+                operatingSystem.T_next = T_next;
+                operatingSystem.T_IntiIO = T_IntiIO;
+                operatingSystem.T_IntrIO = T_IntrIO;
+                operatingSystem.T_Load = T_Load;
+
             }
         }
         private bool IsGenerating
@@ -251,6 +306,18 @@ namespace OperationSystem_ModelApp.ViewModel
                 }
             }
         }
+        public int NumToBeCreate
+        {
+            get => numToBeCreate;
+            set
+            {
+                if (value != numToBeCreate)
+                {
+                    numToBeCreate = value;
+                    OnPropertyChanged("NumToBeCreate");
+                }
+            }
+        }
         public RelayCommand AutoAddTask
         {
             get
@@ -301,6 +368,7 @@ namespace OperationSystem_ModelApp.ViewModel
                         }
                         else
                         {
+
                             _stopwatch.Restart();
                             RamOS = 1024;
                             operatingSystem.Ram_ost = RamOS;
@@ -337,6 +405,21 @@ namespace OperationSystem_ModelApp.ViewModel
                             operatingSystem.RemoveProcess(SelectedTask);
                         }
                     }));
+            }
+        }
+
+
+        public RelayCommand StopOS
+        {
+            get
+            {
+                return stopOS ??
+                    (stopOS = new RelayCommand(obj =>
+                    {
+                        MainWindow window = new MainWindow();
+                        window.Close();
+                    }));
+
             }
         }
 

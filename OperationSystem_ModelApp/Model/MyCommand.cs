@@ -70,7 +70,7 @@ namespace OperationSystem_ModelApp.Model
                     break;
             }
             //Если надо посмотреть как генерируется
-            //Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
+            Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
         }
         public TypeCommand()
         {
