@@ -91,9 +91,9 @@
                 <!--Скорость работы ОС -->
                 <DockPanel Grid.Row="3">
                     <Label DockPanel.Dock="Top" Content="Скорость работы ОС" HorizontalContentAlignment="Center" Foreground="White"/>
-                    <Label DockPanel.Dock="Left" Content="1 мс" VerticalAlignment="Center" Foreground="White"/>
-                    <Label DockPanel.Dock="Right" Content="1 сек" VerticalAlignment="Center" Foreground="White"/>
-                    <Slider  TickPlacement="BottomRight" TickFrequency="100" Maximum="1000" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
+                    <Label DockPanel.Dock="Left" Content="1мс" VerticalAlignment="Center" Foreground="White"/>
+                    <Label DockPanel.Dock="Right" Content="0.5с" VerticalAlignment="Center" Foreground="White"/>
+                    <Slider  TickPlacement="BottomRight" TickFrequency="100" Maximum="500" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
                 </DockPanel>
 
                 <!--Параметры-->

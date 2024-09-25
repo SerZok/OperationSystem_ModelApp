@@ -44,27 +44,76 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Такты для запуска задачи
         /// </summary>
-        public int T_next;
+        public int T_next
+        {
+            get => _t_next;
+            set
+            {
+                if (_t_next != value)
+                {
+                    _t_next = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        private int _t_next;
 
         /// <summary>
         /// Затраты ОС на изменение состояния процесса	
         /// по обращению ко вводу(выводу) (в числе тактов)
         /// </summary>
-        public int T_IntiIO;
+        public int T_IntiIO {
+            get => _t_intiIO;
+            set
+            {
+                if (_t_intiIO != value)
+                {
+                    _t_intiIO = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        private int _t_intiIO;
 
         /// <summary>
         ///  Затраты ОС по обслуживанию сигнала окончания T_IntrIO
         ///  (прерывания) ввода(вывода) (в числе тактов)
         /// </summary>
-        public int T_IntrIO;
+        public int T_IntrIO
+        {
+            get => _t_intrIO;
+            set
+            {
+                if (_t_intrIO != value)
+                {
+                    _t_intrIO = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        private int _t_intrIO;
+
 
         /// <summary>
         /// Число тактов на загрузку нового задания
         /// </summary>
-        public int T_Load;
+        public int T_Load
+        {
+            get => _t_load;
+            set
+            {
+                if (_t_load != value)
+                {
+                    _t_load = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        private int _t_load;
+
 
         /// <summary>
-        /// Скорость работы ОС
+        /// Скорость работы ОС (скорость тактов)
         /// </summary>
         /// 
         public int Speed {
@@ -79,7 +128,6 @@ namespace OperationSystem_ModelApp.Model
 
             }
         }
-
         private int _speed;
 
         public ObservableCollection<MyProcess> _Processes;
@@ -200,15 +248,12 @@ namespace OperationSystem_ModelApp.Model
                     cpuState = CpuState.Working;
                     var proc = _Processes[i];
 
-
-
-                    if (proc.State == ProcessState.InputOutput)
+                    if (proc.State == ProcessState.InputOutput) //Процесс занят IO
                     {
                         cpuState = CpuState.Waiting;
-                        // Запуск фоновой задачи для InOut
                         if (_ioTask == null || _ioTask.IsCompleted)
                         {
-                            _ioTask = Task.Run(() => InOut());  // Стартуем фоновый процесс
+                            _ioTask = Task.Run(() => InOut());
                         }
                         continue;
                     }
@@ -217,7 +262,10 @@ namespace OperationSystem_ModelApp.Model
                     if (proc.State != ProcessState.Completed) //Если не завершена задача
                     {
                         //Запуск задачи
+                        proc.State = ProcessState.StartTask;
                         await Task.Delay(ConvertTaktToMillisec(T_next));
+
+
                         //Выполнение команд
                         while (proc.Commands.Any())
                         {

@@ -111,7 +111,7 @@ namespace OperationSystem_ModelApp.ViewModel
 
             RamOS = 1024;
             kvant = 40;
-            SpeedOS = 250;
+            SpeedOS = 200;
             
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
