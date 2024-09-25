@@ -8,12 +8,14 @@ using System.Windows.Controls.Primitives;
 using System.Windows;
 using System.Net.WebSockets;
 using System.Net.NetworkInformation;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 
 namespace OperationSystem_ModelApp.Model
 {
     public enum CpuState { Waiting, Working }
-    class MyOperationSystem
+    class MyOperationSystem : INotifyPropertyChanged
     {    /// <summary>
          /// Сколько тактов в 1 кванте;
          /// Число тактов моделирования, доступных процессу в состоянии «Активен»
@@ -63,7 +65,21 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Скорость работы ОС
         /// </summary>
-        public int Speed { get; set; } //скорость тиков
+        /// 
+        public int Speed { 
+            get => _speed;
+            set
+            {
+                if (_speed != value)
+                {
+                    _speed = value;
+                    OnPropertyChanged("Speed");
+                }
+
+            }
+        } 
+        
+        private int _speed;
 
         public ObservableCollection<MyProcess> _Processes;
         public ObservableCollection<MyProcess> _listMyPros;
@@ -109,8 +125,6 @@ namespace OperationSystem_ModelApp.Model
             }
             else
                 proc = new MyProcess(CountCommand);
-            lock (_lock)
-            {
                 if (_ram_ost >= proc.Ram)
                 {
                     _Processes.Add(proc);
@@ -120,10 +134,9 @@ namespace OperationSystem_ModelApp.Model
                 {
                     _listMyPros.Add(proc);
                 }
-            }
 
         }
-        public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection выбранный процесс
+        public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection процесс
         {
             lock (_lock)
             {
@@ -141,6 +154,7 @@ namespace OperationSystem_ModelApp.Model
         }
         public int ConvertTaktToMillisec(int takt)
         {
+
             return takt * Speed;
         }
         public async void Generating(CancellationToken cancellationToken)   //Генерация заданий.
@@ -149,11 +163,8 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    lock (_lock)
-                    {
-                        _listMyPros.Add(new MyProcess());
-                    }
-                    await Task.Delay(1000, cancellationToken);
+                    _listMyPros.Add(new MyProcess());
+                    await Task.Delay(1000);
                 }
             }
             catch(TaskCanceledException e)
@@ -181,24 +192,31 @@ namespace OperationSystem_ModelApp.Model
         //Если процесс InputOutput, то надо следующую задачу
         public async Task LauncTask()
         {
-            
+
             while (_Processes.Any())
             {
                 //Загрузка задачи
-                cpuState = CpuState.Working;
                 await Task.Delay(ConvertTaktToMillisec(T_Load));
 
                 for (int i = 0; i<_Processes.Count;i++)
                 {
+                    cpuState = CpuState.Working;
                     var proc = _Processes[i];
                     if (proc.State == ProcessState.InputOutput)
                     {
+                        cpuState = CpuState.Waiting;
+                        if (_ioThread.ThreadState == ThreadState.Unstarted || _ioThread.ThreadState == ThreadState.Aborted)
+                            _ioThread.Start();
+                        Task.Run(() => InOut());
+
                         continue;
                     }
 
+                    
                     //Выполнять 1 квант (Kavnt-=takt)
                     if (proc.State != ProcessState.Completed) //Если не завершена задача
                     {
+                        
                         //Запуск задачи
                         await Task.Delay(ConvertTaktToMillisec(T_next));
                         //Выполнение команд
@@ -208,10 +226,13 @@ namespace OperationSystem_ModelApp.Model
                             //Если комманда IO
                             if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
                             {
-                                IOList.Add(proc.Id + 1); //Добавляем ID задачи в список, которые обрабатываю IO
+
+
+                                IOList.Add(proc.Id); //Добавляем ID задачи в список, которые обрабатываю IO
                                 proc.State = ProcessState.InputOutput;
-                                if (_ioThread.ThreadState==ThreadState.Unstarted)
-                                    _ioThread.Start();
+                                //if (_ioThread.ThreadState == ThreadState.Unstarted || _ioThread.ThreadState==ThreadState.Aborted)
+                                //    _ioThread.Start();
+                                Task.Run(() => InOut());
                                 break;
 
                             }
@@ -226,6 +247,7 @@ namespace OperationSystem_ModelApp.Model
                         if (!proc.Commands.Any())
                         {
                             proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если команды кончились
+                            cpuState = CpuState.Waiting;
                             break;
                         }
                     }
@@ -244,12 +266,13 @@ namespace OperationSystem_ModelApp.Model
         {
             lock (_Processes)
             {
+                var procList = _Processes.ToList();
                 while (IOList.Any() && _Processes.Any())
                 {
                     cpuState = CpuState.Waiting;
-
                     var id = IOList.First();
-                    var proc = _Processes.FirstOrDefault(x => x.Id == id);
+
+                    var proc = procList.FirstOrDefault(x => x.Id == id);
                     if (proc != null)
                     {
                         //await Task.Delay(ConvertTaktToMillisec(T_IntiIO));
@@ -265,8 +288,8 @@ namespace OperationSystem_ModelApp.Model
                         IOList.Remove(id);
                     }
                 }
-                cpuState = CpuState.Working;
             }
+            cpuState = CpuState.Working;
         }
 
         //Старт проверки ОЗУ
@@ -318,6 +341,13 @@ namespace OperationSystem_ModelApp.Model
                     _Processes.Remove(item);
                 }
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string prop = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
     }
 }

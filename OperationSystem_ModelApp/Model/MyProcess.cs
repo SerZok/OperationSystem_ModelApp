@@ -23,7 +23,9 @@ namespace OperationSystem_ModelApp.Model
     {
         private Random rnd = new Random();
 
-        private static int id = 0;
+        private int id;
+        private static int _count = 0;
+
         /// <summary>
         /// Количество памяти для выполнения задания;
         /// Сумма памяти команд
@@ -40,7 +42,13 @@ namespace OperationSystem_ModelApp.Model
         {
             get
             {
-                return id++;
+                return id;
+            }
+            set
+            {
+                id = value;
+                _count++;
+                OnPropertyChanged("Id");
             }
         }
 
@@ -61,6 +69,8 @@ namespace OperationSystem_ModelApp.Model
 
         public MyProcess()
         {
+            Id = _count;
+
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
@@ -82,6 +92,8 @@ namespace OperationSystem_ModelApp.Model
 
         public MyProcess(int countCom)
         {
+            Id = _count;
+
             countCommands = countCom;
             Debug.WriteLine($"*********Task #{id} **********");
             //Генерация команд
