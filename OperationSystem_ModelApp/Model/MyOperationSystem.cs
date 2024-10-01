@@ -41,6 +41,17 @@ namespace OperationSystem_ModelApp.Model
             set => _ram_ost = value;
         }
 
+        private int _d_InOut;
+        public int D_InOut
+        {
+            get => _d_InOut;
+            set
+            {
+                _d_InOut = value;
+                OnPropertyChanged("D_InOut");
+            }
+        }
+
         /// <summary>
         /// Такты для запуска задачи
         /// </summary>
@@ -93,7 +104,6 @@ namespace OperationSystem_ModelApp.Model
         }
         private int _t_intrIO;
 
-
         /// <summary>
         /// Число тактов на загрузку нового задания
         /// </summary>
@@ -110,7 +120,6 @@ namespace OperationSystem_ModelApp.Model
             }
         }
         private int _t_load;
-
 
         /// <summary>
         /// Скорость работы ОС (скорость тактов)
@@ -129,6 +138,16 @@ namespace OperationSystem_ModelApp.Model
             }
         }
         private int _speed;
+
+        private int _competedTasks;
+        public int CompetedTasks
+        {
+            get => _competedTasks;
+            set {
+                _competedTasks= value;
+                OnPropertyChanged("CompetedTasks");
+            }
+        }
 
         public ObservableCollection<MyProcess> _Processes;
         public ObservableCollection<MyProcess> _listMyPros;
@@ -158,10 +177,10 @@ namespace OperationSystem_ModelApp.Model
             T_IntrIO = 3;
             T_Load = 4;
         }
-
         public void AddProcess(int CountCommand)
         {
             MyProcess proc;
+            MyProcess.DInOut=D_InOut;
             if (CountCommand < 2)
             {
                 MessageBox.Show("Для задачи нужно как минимум 2 команды.\nЗадание будет сгенерировано со случайным набором команд", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -169,6 +188,7 @@ namespace OperationSystem_ModelApp.Model
             }
             else
                 proc = new MyProcess(CountCommand);
+
             if (_ram_ost >= proc.Ram)
             {
                 _Processes.Add(proc);
@@ -207,6 +227,7 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
+                    MyProcess.DInOut = D_InOut;
                     _listMyPros.Add(new MyProcess());
                     await Task.Delay(1000);
                 }
@@ -265,7 +286,7 @@ namespace OperationSystem_ModelApp.Model
                         proc.State = ProcessState.StartTask;
                         await Task.Delay(ConvertTaktToMillisec(T_next));
 
-
+                        var kvant = Kvant;
                         //Выполнение команд
                         while (proc.Commands.Any())
                         {
@@ -280,8 +301,20 @@ namespace OperationSystem_ModelApp.Model
                             else //Если команда не IO
                             {
                                 proc.State = ProcessState.Running;
-                                await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
-                                proc.Commands.Remove(fCommand);
+                                if (kvant > 0)
+                                {
+                                    await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                                    kvant -= fCommand.TypeCmd.timeTypeCommand;
+                                    proc.Commands.Remove(fCommand);
+                                    //MessageBox.Show($"Квант {kvant}");
+                                }
+                                else
+                                {
+                                    proc.State = ProcessState.Ready;
+                                    i = 0;
+                                }
+                                proc.State = ProcessState.Ready;
+                                i = 0;
                             }
                         }
 
@@ -289,6 +322,7 @@ namespace OperationSystem_ModelApp.Model
                         {
                             RemoveProcess(proc);
                             cpuState = CpuState.Waiting;
+                            CompetedTasks++;
                             break;
                         }
                     }
@@ -306,7 +340,6 @@ namespace OperationSystem_ModelApp.Model
         private async Task InOut()
         {
             await _semaphore.WaitAsync();
-
             try
             {
                 var procList = _Processes.ToList();
@@ -316,11 +349,11 @@ namespace OperationSystem_ModelApp.Model
                     if (IOList.TryDequeue(out var id)) // Потокобезопасное удаление задачи
                     {
                         var proc = _Processes.FirstOrDefault(x => x.Id == id);
+
                         if (proc != null)
                         {
                             await Task.Delay(ConvertTaktToMillisec(T_IntiIO)); // Эмуляция обработки IO
                             proc.Commands.Remove(proc.Commands.First());
-
                             // Если есть еще команды, процесс снова переходит в состояние Ready
                             if (proc.Commands.Any())
                                 proc.State = ProcessState.Ready;
@@ -329,13 +362,13 @@ namespace OperationSystem_ModelApp.Model
                         }
                     }
                     cpuState = CpuState.Working;
+                    await Task.Delay(ConvertTaktToMillisec(T_IntrIO));
                 }
             }
             finally
             {
                 _semaphore.Release();
             }
-            await Task.Delay(10);
         }
 
         //Старт проверки ОЗУ

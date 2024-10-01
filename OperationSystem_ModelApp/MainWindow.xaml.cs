@@ -28,5 +28,7 @@ namespace OperationSystem_ModelApp
         {
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
+
+        
     }
 }

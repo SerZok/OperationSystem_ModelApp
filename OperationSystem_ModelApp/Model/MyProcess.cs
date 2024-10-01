@@ -38,6 +38,15 @@ namespace OperationSystem_ModelApp.Model
         public ObservableCollection<Command> Commands { get; set; } = new ObservableCollection<Command>();
 
         private int countCommands;
+        private int _countAllCommands;
+        public int CountAllCommands
+        {
+            get => _countAllCommands;
+            set { 
+                _countAllCommands = value;
+                OnPropertyChanged("CountAllCommands");
+            }
+        }
         public int Id
         {
             get
@@ -67,11 +76,15 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        static public int DInOut {get; set;}
         public MyProcess()
         {
             Id = _count;
-
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
+            CountAllCommands = countCommands;
+
+            int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
+
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
             {
@@ -82,11 +95,19 @@ namespace OperationSystem_ModelApp.Model
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
                 }
+                while (ioCommandCount>0)
+                {
+                    var IOcommand = new Command(false,true);
+                    Ram += IOcommand.TypeCmd.sizeTypeCommand;
+                    Commands.Add(IOcommand);
+                    ioCommandCount--;
+                    i++;
+                }
+
                 var command = new Command(false);
                 Ram += command.TypeCmd.sizeTypeCommand;
                 Commands.Add(command);
             }
-
             State = ProcessState.Ready;
         }
 
@@ -95,6 +116,8 @@ namespace OperationSystem_ModelApp.Model
             Id = _count;
 
             countCommands = countCom;
+            CountAllCommands = countCommands;
+
             Debug.WriteLine($"*********Task #{id} **********");
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
@@ -106,6 +129,7 @@ namespace OperationSystem_ModelApp.Model
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
                 }
+
                 var command = new Command(false);
                 Ram += command.TypeCmd.sizeTypeCommand;
                 Commands.Add(command);

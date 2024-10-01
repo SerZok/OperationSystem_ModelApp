@@ -21,15 +21,22 @@ namespace OperationSystem_ModelApp.Model
             }
         }
         private bool _islast;
-        public Command(bool islast)
+        public Command(bool islast, bool isIO=false)
         {
             rnd = new Random();
             _islast = islast;
             if (!_islast)
             {
-                //Рандомная задача
-                var rndType = (NameTypeCommand)rnd.Next(1, Enum.GetValues(typeof(NameTypeCommand)).Length);
-                TypeCmd = new TypeCommand(rndType);
+                if (isIO)
+                {
+                    TypeCmd = new TypeCommand(NameTypeCommand.IO);
+                }
+                else
+                {
+                    //Рандомная задача
+                    var rndType = (NameTypeCommand)rnd.Next(2, Enum.GetValues(typeof(NameTypeCommand)).Length);
+                    TypeCmd = new TypeCommand(rndType);
+                }
             }
             else
             {
@@ -70,7 +77,7 @@ namespace OperationSystem_ModelApp.Model
                     break;
             }
             //Если надо посмотреть как генерируется
-            //Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
+            Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
         }
         public TypeCommand()
         {
