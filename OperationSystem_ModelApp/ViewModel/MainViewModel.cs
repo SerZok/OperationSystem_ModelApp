@@ -42,61 +42,21 @@ namespace OperationSystem_ModelApp.ViewModel
         private int speedOS;
         private int numToBeCreate;
         private RelayCommand stopOS;
+        private int _osCost;
+        private int _competedTasks;
+        private int _d_InOut;
 
         private int t_next;
         private int t_IntiIO;
         private int t_IntrIO;
         private int t_Load;
-
-        public int T_next
+        public int D_InOut
         {
-            get => t_next;
+            get => _d_InOut;
             set
             {
-                if (t_next != value)
-                {
-                    t_next = value;
-                    OnPropertyChanged("T_next");
-                }
-            }
-        }
-
-        public int T_IntiIO
-        {
-            get => t_IntiIO;
-            set
-            {
-                if (t_IntiIO != value)
-                {
-                    t_IntiIO = value;
-                    OnPropertyChanged("T_IntiIO");
-                }
-            }
-        }
-
-        public int T_IntrIO
-        {
-            get => t_IntrIO;
-            set
-            {
-                if (t_IntrIO != value)
-                {
-                    t_IntrIO = value;
-                    OnPropertyChanged("T_IntrIO");
-                }
-            }
-        }
-
-        public int T_Load
-        {
-            get => t_Load;
-            set
-            {
-                if (t_Load != value)
-                {
-                    t_Load = value;
-                    OnPropertyChanged("T_Load");
-                }
+                _d_InOut = value;
+                OnPropertyChanged("D_InOut");
             }
         }
 
@@ -111,15 +71,18 @@ namespace OperationSystem_ModelApp.ViewModel
 
             RamOS = 1024;
             kvant = 40;
-            SpeedOS = 250;
-            
+            SpeedOS = 200;
+            OsCost = 100;
+            CompletedTasks = 0;
+
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
             threadForUI = new Thread(UpdateForUI);
 
             T_next = 2;
-            T_IntiIO = 60;
-            T_IntrIO = 60;
+            T_IntiIO = 30;
+            T_IntrIO = 40;
             T_Load = 4;
+            D_InOut = 20;
         }
 
         public Random random;
@@ -155,6 +118,10 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.T_IntrIO = T_IntrIO;
                 operatingSystem.T_Load = T_Load;
 
+                OsCost = (int)Math.Round((double)RamOS_ostatok / RamOS * 100);
+
+                CompletedTasks = operatingSystem.CompetedTasks;
+                operatingSystem.D_InOut = D_InOut;
             }
         }
         private bool IsGenerating
@@ -251,6 +218,72 @@ namespace OperationSystem_ModelApp.ViewModel
             {
                 kvant = value;
                 OnPropertyChanged("Kvant");
+            }
+        }
+        public int T_next
+        {
+            get => t_next;
+            set
+            {
+                if (t_next != value)
+                {
+                    t_next = value;
+                    OnPropertyChanged("T_next");
+                }
+            }
+        }
+        public int T_IntiIO
+        {
+            get => t_IntiIO;
+            set
+            {
+                if (t_IntiIO != value)
+                {
+                    t_IntiIO = value;
+                    OnPropertyChanged("T_IntiIO");
+                }
+            }
+        }
+        public int T_IntrIO
+        {
+            get => t_IntrIO;
+            set
+            {
+                if (t_IntrIO != value)
+                {
+                    t_IntrIO = value;
+                    OnPropertyChanged("T_IntrIO");
+                }
+            }
+        }
+        public int T_Load
+        {
+            get => t_Load;
+            set
+            {
+                if (t_Load != value)
+                {
+                    t_Load = value;
+                    OnPropertyChanged("T_Load");
+                }
+            }
+        }
+        public int OsCost
+        {
+            get => _osCost;
+            set
+            {
+                _osCost = value;
+                OnPropertyChanged("OsCost");
+            }
+        }
+        public int CompletedTasks
+        {
+            get => _competedTasks;
+            set
+            {
+                _competedTasks = value;
+                OnPropertyChanged("CompletedTasks");
             }
         }
         public Visibility IsVisableProperty
@@ -368,11 +401,11 @@ namespace OperationSystem_ModelApp.ViewModel
                         }
                         else
                         {
-
                             _stopwatch.Restart();
                             RamOS = 1024;
                             operatingSystem.Ram_ost = RamOS;
                             operatingSystem.Takt = 0;
+                            operatingSystem.CompetedTasks = 0;
 
                             operatingSystem._listMyPros.Clear();
                             operatingSystem._Processes.Clear();
@@ -407,8 +440,6 @@ namespace OperationSystem_ModelApp.ViewModel
                     }));
             }
         }
-
-
         public RelayCommand StopOS
         {
             get
@@ -422,6 +453,7 @@ namespace OperationSystem_ModelApp.ViewModel
 
             }
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")

@@ -8,12 +8,13 @@
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="Модель ОС (FIFO)" Height="720" Width="1080"
-        WindowStartupLocation="CenterScreen"
+        Title="Модель ОС (FIFO)" 
+        MinHeight="800" MinWidth="800"
+        Height="800" Width="800"
+        WindowState="Normal"
         >
 
-
-    <Grid Background="#444">
+    <Grid Background="#333">
         <Grid.RowDefinitions>
             <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -39,8 +40,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -59,17 +60,20 @@
                     </Style>
                 </Grid.Resources>
 
+                <!--Генерация заданий-->
                 <Grid  Grid.Row="1" Background="#FF77C9BA">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition></ColumnDefinition>
                         <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
+                    <!--Новое задание/кол-во команд-->
                     <Grid Grid.ColumnSpan="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition></ColumnDefinition>
@@ -81,9 +85,17 @@
                             <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="{Binding NumToBeCreate}" Height="30"/>
                         </StackPanel>
                     </Grid>
-                    <Label Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Авто-генерация "/>
-                    <RadioButton  Grid.Column="0" Grid.Row="2" Content="Включить"  VerticalAlignment="Top" HorizontalAlignment="Center" Command="{Binding AutoAddTask}"/>
-                    <RadioButton Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
+                    
+                    <Label                          Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Авто-генерация "/>
+                    <RadioButton    Grid.Column="0" Grid.Row="2" Content="Включить"  VerticalAlignment="Top" HorizontalAlignment="Center" Command="{Binding AutoAddTask}"/>
+                    <RadioButton    Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
+
+                    <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="#111" BorderThickness="2">
+                        <DockPanel Grid.Row="3" Grid.ColumnSpan="2" Background="#696969">
+                            <Label DockPanel.Dock="Left" Content="IO команд %"/>
+                            <Slider TickPlacement="BottomRight" Minimum="0" Maximum="100" TickFrequency="20" IsSnapToTickEnabled="True" Value="{Binding D_InOut}"/>
+                        </DockPanel>
+                    </Border>
                 </Grid>
 
                 <Button Grid.Row="2" Content="Уничтожить выбранный процесс" Command="{Binding DelTask}" Margin="5"/>
@@ -91,9 +103,9 @@
                 <!--Скорость работы ОС -->
                 <DockPanel Grid.Row="3">
                     <Label DockPanel.Dock="Top" Content="Скорость работы ОС" HorizontalContentAlignment="Center" Foreground="White"/>
-                    <Label DockPanel.Dock="Left" Content="1 мс" VerticalAlignment="Center" Foreground="White"/>
-                    <Label DockPanel.Dock="Right" Content="1 сек" VerticalAlignment="Center" Foreground="White"/>
-                    <Slider  TickPlacement="BottomRight" TickFrequency="250" Maximum="1000" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
+                    <Label DockPanel.Dock="Left" Content="1мс" VerticalAlignment="Center" Foreground="White"/>
+                    <Label DockPanel.Dock="Right" Content="0.5с" VerticalAlignment="Center" Foreground="White"/>
+                    <Slider  TickPlacement="BottomRight" TickFrequency="100" Maximum="500" Minimum="1" IsSnapToTickEnabled="True" Value="{Binding SpeedOS, Mode=TwoWay}"/>
                 </DockPanel>
 
                 <!--Параметры-->
@@ -143,8 +155,15 @@
                         <DataGridTextColumn Width="Auto" Header="ID" Binding="{Binding Id}"/>
                         <DataGridTextColumn Width="150"  Header="ОЗУ" Binding="{Binding Ram}"/>
                         <DataGridTextColumn Header="Состояние" Binding="{Binding State}"/>
-                        <DataGridTextColumn Header="Количество команд" Binding="{Binding Commands.Count}"/>
+                        <DataGridTextColumn Header="Команд на выполнение" Binding="{Binding Commands.Count}"/>
+                        <DataGridTextColumn Header="Всего команд" Binding="{Binding CountAllCommands}"/>
                     </DataGrid.Columns>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="Black"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                    </DataGrid.RowStyle>
                 </DataGrid>
             </TabItem>
             <TabItem Header="Console">
@@ -156,6 +175,7 @@
         <!--Параметры (верхние панельки)-->
         <Grid Grid.ColumnSpan="2" Background="#707070" Margin="10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -179,8 +199,18 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
+           <!---->
+            <Grid Grid.Column="0" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="Системные затраты, %" Style="{StaticResource LabelAlign}"/>
+                <TextBox Text="{Binding OsCost}" Grid.Row="1" IsReadOnly="True" TextAlignment="Center" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
+            </Grid>
+
             <!--Остаток ОЗУ-->
-            <Grid Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+            <Grid Grid.Column="1" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -190,7 +220,7 @@
             </Grid>
 
             <!--Количество сгенеированных задач-->
-            <Grid Grid.Column="1" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+            <Grid Grid.Column="2" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -200,7 +230,7 @@
             </Grid>
 
             <!--Количество задач в загрузке мб-->
-            <Grid Grid.Column="2" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+            <Grid Grid.Column="3" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
@@ -209,21 +239,14 @@
                 <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding CountTasks}" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
-            <Grid Grid.Column="3" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Content="Время работы ОС" Style="{StaticResource LabelAlign}"/>
-                <TextBox Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
-            </Grid>
-
+            <!--Число выполненных заданий-->
             <Grid Grid.Column="4" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-
+                <Label Content="Число выполненых заданий"  Style="{StaticResource LabelAlign}"/>
+                <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding CompletedTasks}" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
             <Grid Grid.Column="5" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
