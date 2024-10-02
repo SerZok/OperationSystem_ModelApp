@@ -302,20 +302,8 @@ namespace OperationSystem_ModelApp.Model
                             else //Если команда не IO
                             {
                                 proc.State = ProcessState.Running;
-                                if (kvant > 0)
-                                {
-                                    await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
-                                    kvant -= fCommand.TypeCmd.timeTypeCommand;
-                                    proc.Commands.Remove(fCommand);
-                                    //MessageBox.Show($"Квант {kvant}");
-                                }
-                                else
-                                {
-                                    proc.State = ProcessState.Ready;
-                                    i = 0;
-                                }
-                                proc.State = ProcessState.Ready;
-                                i = 0;
+                                await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                                proc.Commands.Remove(fCommand);
                             }
                         }
 
