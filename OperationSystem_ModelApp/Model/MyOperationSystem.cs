@@ -181,6 +181,7 @@ namespace OperationSystem_ModelApp.Model
         {
             MyProcess proc;
             MyProcess.DInOut=D_InOut;
+
             if (CountCommand < 2)
             {
                 MessageBox.Show("Для задачи нужно как минимум 2 команды.\nЗадание будет сгенерировано со случайным набором команд", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);

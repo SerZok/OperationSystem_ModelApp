@@ -8,8 +8,10 @@
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="Модель ОС (FIFO)" Height="1080" Width="1920"
-        WindowState="Maximized"
+        Title="Модель ОС (FIFO)" 
+        MinHeight="800" MinWidth="800"
+        Height="800" Width="800"
+        WindowState="Normal"
         >
 
     <Grid Background="#333">

@@ -117,6 +117,7 @@ namespace OperationSystem_ModelApp.Model
 
             countCommands = countCom;
             CountAllCommands = countCommands;
+            int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
 
             Debug.WriteLine($"*********Task #{id} **********");
             //Генерация команд
@@ -128,6 +129,14 @@ namespace OperationSystem_ModelApp.Model
                     Commands.Add(commandLast);
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
+                }
+                while (ioCommandCount > 0)
+                {
+                    var IOcommand = new Command(false, true);
+                    Ram += IOcommand.TypeCmd.sizeTypeCommand;
+                    Commands.Add(IOcommand);
+                    ioCommandCount--;
+                    i++;
                 }
 
                 var command = new Command(false);
