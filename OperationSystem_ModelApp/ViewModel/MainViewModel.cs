@@ -83,7 +83,7 @@ namespace OperationSystem_ModelApp.ViewModel
             RamOS = 1024;
             kvant = 40;
             SpeedOS = 200;
-            OsCost = 100;
+            OsCost = 0;
             CompletedTasks = 0;
 
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
@@ -150,7 +150,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.T_IntrIO = T_IntrIO;
                 operatingSystem.T_Load = T_Load;
 
-                OsCost = (int)Math.Round((double)RamOS_ostatok / RamOS * 100);
+                OsCost = (100 - (int)Math.Round((double)RamOS_ostatok / RamOS * 100));
 
                 CompletedTasks = operatingSystem.CompetedTasks;
                 operatingSystem.D_InOut = D_InOut;
