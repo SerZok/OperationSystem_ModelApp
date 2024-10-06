@@ -126,25 +126,32 @@
                     <Label Grid.Column="0" Content="Память (Kb)" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="1" Content="T_next" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="1" Content="Тактов для запуска задач" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding T_next}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="2" Content="T_InitIO" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="2" Content="Тактов для запуска IO" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding T_IntiIO}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="3" Content="T_IntrIO" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="3" Content="Таков для прерывания IO" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding T_IntrIO}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="4" Content="T_Load" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="4" Content="Таков для загрузки" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding T_Load}" Style="{StaticResource TextBoxAlign}"/>
 
                     <Label Grid.Column="0" Grid.Row="5" Content="Квант" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding Kvant}" Style="{StaticResource TextBoxAlign}"/>
                 </Grid>
 
-                <Button Grid.Row="5" Content="Применить изменения" Height="35"/>
+                <Grid Grid.Row="5" Height="35" Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button Name="FromFile" Click="FromFile_Click" Command="{Binding ParseCommand}" Content="Из файла" Margin="5,0,5,0" />
+                    <Button Grid.Column="1" Content="Применить" Margin="5,0,5,0"/>
+                </Grid>
                 <Button Grid.Row="6" Content="Выполнить все процессы &#x0a; и выключить ОС" Command="{Binding StopOS}" Margin="10" />
-            </Grid>
+            </Grid> <!--/Нижняя панель-->
         </Grid>
 
         <!--Консоль/TaskBar-->

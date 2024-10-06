@@ -8,7 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using Microsoft.Win32;
+using System.IO;
 using OperationSystem_ModelApp.ViewModel;
 
 namespace OperationSystem_ModelApp
@@ -29,6 +30,15 @@ namespace OperationSystem_ModelApp
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
 
-        
+        private void FromFile_Click(object sender, RoutedEventArgs e)
+        {
+            var OpenDialog = new OpenFileDialog();
+            var vm = (MainViewModel)DataContext;
+
+            if (OpenDialog.ShowDialog() == true)
+            {
+                vm.PathToFile = OpenDialog.FileName;
+            }
+        }
     }
 }

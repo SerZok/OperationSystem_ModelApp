@@ -42,6 +42,9 @@ namespace OperationSystem_ModelApp.Model
         }
 
         private int _d_InOut;
+        /// <summary>
+        /// Процент команд ВВ в заданиях для генерации
+        /// </summary>
         public int D_InOut
         {
             get => _d_InOut;
