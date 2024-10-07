@@ -24,9 +24,10 @@ namespace OperationSystem_ModelApp.Model
          /// </summary>
         public static int Kvant;
         public int Takt { get; set; }
-        private int _ram = 1024; 
+        private int _ram = 1024;
         private int _ram_ost;
-        public int Ram {
+        public int Ram
+        {
             get => _ram;
             set
             {
@@ -76,7 +77,8 @@ namespace OperationSystem_ModelApp.Model
         /// Затраты ОС на изменение состояния процесса	
         /// по обращению ко вводу(выводу) (в числе тактов)
         /// </summary>
-        public int T_IntiIO {
+        public int T_IntiIO
+        {
             get => _t_intiIO;
             set
             {
@@ -128,7 +130,8 @@ namespace OperationSystem_ModelApp.Model
         /// Скорость работы ОС (скорость тактов)
         /// </summary>
         /// 
-        public int Speed {
+        public int Speed
+        {
             get => _speed;
             set
             {
@@ -146,15 +149,16 @@ namespace OperationSystem_ModelApp.Model
         public int CompetedTasks
         {
             get => _competedTasks;
-            set {
-                _competedTasks= value;
+            set
+            {
+                _competedTasks = value;
                 OnPropertyChanged("CompetedTasks");
             }
         }
 
         public ObservableCollection<MyProcess> _Processes;
         public ObservableCollection<MyProcess> _listMyPros;
-        public ConcurrentQueue<int> IOList;
+        public List<int> IOList;
 
         public CpuState cpuState;
 
@@ -165,7 +169,7 @@ namespace OperationSystem_ModelApp.Model
         {
             _Processes = new ObservableCollection<MyProcess>();
             _listMyPros = new ObservableCollection<MyProcess>();
-            IOList = new ConcurrentQueue<int>();
+            IOList = new List<int>();
             _ram_ost = _ram;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationTokenSourceTasks = new CancellationTokenSource();
@@ -183,7 +187,7 @@ namespace OperationSystem_ModelApp.Model
         public void AddProcess(int CountCommand)
         {
             MyProcess proc;
-            MyProcess.DInOut=D_InOut;
+            MyProcess.DInOut = D_InOut;
 
             if (CountCommand < 2)
             {
@@ -244,7 +248,8 @@ namespace OperationSystem_ModelApp.Model
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested) {
+                while (!cancellationToken.IsCancellationRequested)
+                {
                     await LauncTask();
                     await Task.Delay(10);
                 }
@@ -277,13 +282,9 @@ namespace OperationSystem_ModelApp.Model
                     cpuState = CpuState.Working;
                     var proc = _Processes[i];
 
-                    if (proc.State == ProcessState.InputOutput || proc.State == ProcessState.InitIO) //Процесс занят IO
+                    if (proc.State == ProcessState.InputOutput || proc.State == ProcessState.Init_IO || proc.State == ProcessState.End_IO) //Процесс занят IO
                     {
                         cpuState = CpuState.Waiting;
-                        if (_ioTask == null || _ioTask.IsCompleted)
-                        {
-                            _ioTask = Task.Run(() => InOut());
-                        }
                         continue;
                     }
 
@@ -302,10 +303,13 @@ namespace OperationSystem_ModelApp.Model
                             //Если комманда IO
                             if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
                             {
-                                IOList.Enqueue(proc.Id); //Добавляем ID задачи в список, которые обрабатываю IO
+                                IOList.Add(proc.Id); //Добавляем ID задачи в список, которые обрабатываю IO
                                 //proc.State = ProcessState.InputOutput;
-                                proc.State = ProcessState.InitIO;
+                                proc.State = ProcessState.Init_IO;
                                 await Task.Delay(ConvertTaktToMillisec(T_IntiIO)); // Инициализация IO
+
+                                new Thread(() => InOut()).Start();
+
 
                                 cpuState = CpuState.Waiting;
 
@@ -338,42 +342,69 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Асинхронная блокировка
-        private async Task InOut()
+        private void InOut()
         {
-            await _semaphore.WaitAsync();
-            try
+            var id = IOList.First();
+            var proc = _Processes.FirstOrDefault(x => x.Id == id);
+            if (proc != null)
             {
-                var procList = _Processes.ToList();
-                while (IOList.Any() && _Processes.Any())
-                {
-                    cpuState = CpuState.Waiting;
-                    if (IOList.TryDequeue(out var id)) // Потокобезопасное удаление задачи
-                    {
-                        var proc = _Processes.FirstOrDefault(x => x.Id == id);
+                IOList.Remove(id);
+                proc.State = ProcessState.InputOutput;
 
-                        if (proc != null)
-                        {
-                            //await Task.Delay(ConvertTaktToMillisec(TIO));
-                            var fCommand = proc.Commands.First();
-                            await proc.DoTask(fCommand, Speed);
-                            proc.Commands.Remove(fCommand);
-                            // Если есть еще команды, процесс снова переходит в состояние Ready
-                            if (proc.Commands.Any())
-                                proc.State = ProcessState.Ready;
-                            else
-                                proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если все команды завершены
-                        }
-                    }
-                    cpuState = CpuState.Working;
-                    await Task.Delay(ConvertTaktToMillisec(T_IntrIO));
-                }
+                var fCommand = proc.Commands.First();
+                proc.DoTask(fCommand, Speed, true);
+                proc.Commands.Remove(fCommand);
+
+                proc.State = ProcessState.End_IO;
+                Thread.Sleep(ConvertTaktToMillisec(T_IntrIO));
+
+                if (proc.Commands.Any())
+                    proc.State = ProcessState.Ready;
+                else
+                    proc.State = ProcessState.Completed;
             }
-            finally
-            {
-                _semaphore.Release();
-            }
+
+
         }
+
+        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Асинхронная блокировка
+        //private async Task InOut()
+        //{
+        //    await _semaphore.WaitAsync();
+        //    try
+        //    {
+        //        var procList = _Processes.ToList();
+        //        while (IOList.Any() && _Processes.Any())
+        //        {
+        //            cpuState = CpuState.Waiting;
+        //            if (IOList.TryDequeue(out var id)) // Потокобезопасное удаление задачи
+        //            {
+        //                var proc = _Processes.FirstOrDefault(x => x.Id == id);
+
+        //                if (proc != null)
+        //                {
+        //                    //await Task.Delay(ConvertTaktToMillisec(TIO));
+        //                    var fCommand = proc.Commands.First();
+        //                    await proc.DoTask(fCommand, Speed);
+        //                    proc.Commands.Remove(fCommand);
+        //                    // Если есть еще команды, процесс снова переходит в состояние Ready
+        //                    if (proc.Commands.Any())
+        //                        proc.State = ProcessState.Ready;
+        //                    else
+        //                        proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если все команды завершены
+        //                }
+        //            }
+        //            cpuState = CpuState.Working;
+        //            await Task.Delay(ConvertTaktToMillisec(T_IntrIO));
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        _semaphore.Release();
+        //    }
+        //}
+
+
 
         //Старт проверки ОЗУ
         private async void StartRamCheck(CancellationToken cancellationToken)

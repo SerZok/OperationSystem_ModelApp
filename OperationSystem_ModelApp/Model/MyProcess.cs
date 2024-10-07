@@ -17,7 +17,8 @@ namespace OperationSystem_ModelApp.Model
         Running,
         Completed,
         InputOutput,
-        InitIO,
+        Init_IO,
+        End_IO,
         StartTask
     }
     internal class MyProcess: INotifyPropertyChanged
@@ -72,14 +73,16 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        async public Task DoTask(Command cmd, int speed)
+        async public Task DoTask(Command cmd, int speed, bool isThread=false)
         {
-            //await Task.Delay( cmd.TypeCmd.timeTypeCommand;
             ProcTakt = cmd.TypeCmd.timeTypeCommand;
             while (ProcTakt > 0)
             {
                 ProcTakt--;
-                await Task.Delay(speed);
+                if (isThread) 
+                    Thread.Sleep(speed);
+                else
+                    await Task.Delay(speed);
             }
         }
 
