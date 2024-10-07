@@ -9,7 +9,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Text.Json;
 using OperationSystem_ModelApp.Model;
+using static System.Net.Mime.MediaTypeNames;
+using System.IO;
+using System.Runtime.Intrinsics.Arm;
+using System.Xml.Linq;
 
 namespace OperationSystem_ModelApp.ViewModel
 {
@@ -45,12 +50,18 @@ namespace OperationSystem_ModelApp.ViewModel
         private int _osCost;
         private int _competedTasks;
         private int _d_InOut;
+        private string _pathToFile;
+
+        public string PathToFile { get => _pathToFile; set => _pathToFile = value; }
+
+        public RelayCommand Test { get; }
+
 
         private int t_next;
         private int t_IntiIO;
         private int t_IntrIO;
         private int t_Load;
-        public int D_InOut
+        public int D_InOut //Процент команд IO
         {
             get => _d_InOut;
             set
@@ -63,7 +74,7 @@ namespace OperationSystem_ModelApp.ViewModel
         public MainViewModel()
         {
             operatingSystem = new MyOperationSystem();
-            _stopwatch=new Stopwatch();
+            _stopwatch = new Stopwatch();
             ProcessesOS = operatingSystem._Processes;
             IsGenerating = false;
             IsVisableProperty = Visibility.Hidden;
@@ -72,7 +83,7 @@ namespace OperationSystem_ModelApp.ViewModel
             RamOS = 1024;
             kvant = 40;
             SpeedOS = 200;
-            OsCost = 100;
+            OsCost = 0;
             CompletedTasks = 0;
 
             threadForOS = new Thread(new ThreadStart(operatingSystem.CountTakt));
@@ -86,7 +97,28 @@ namespace OperationSystem_ModelApp.ViewModel
         }
 
         public Random random;
-        public ObservableCollection<MyProcess> ProcessesOS { get;  set; }
+        public ObservableCollection<MyProcess> ProcessesOS { get; set; }
+
+        public class ParamsForOS
+        {
+            public int Ram { get; set; }
+            public int TNext { get; set; }
+            public int TInitIO { get; set; }
+            public int TIntrIO { get; set; }
+            public int TLoad { get; set; }
+            public int Kvant { get; set; }
+
+            public ParamsForOS(int ram, int tnext, int tinitio, int tintrio, int tload, int kvant)
+            {
+                Ram = ram;
+                TNext = tnext;
+                TInitIO = tinitio;
+                TIntrIO = tintrio;
+                TLoad = tload;
+                Kvant = kvant;
+
+            }
+        }
 
         //Метод для обновления полей для отображения. Нужен для потока
         private void UpdateForUI()
@@ -98,14 +130,14 @@ namespace OperationSystem_ModelApp.ViewModel
                 CountListTasks = operatingSystem._listMyPros.Count;
                 RamOS_ostatok = operatingSystem.Ram_ost;
                 StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
-                CPU_State ="Состояние ЦП: "+ Enum.GetName(typeof(CpuState), operatingSystem.cpuState);
+                CPU_State = "Состояние ЦП: " + Enum.GetName(typeof(CpuState), operatingSystem.cpuState);
 
                 if (RamOS == 0)
                     IsVisableProperty = Visibility.Hidden;
                 else
                     IsVisableProperty = Visibility.Visible;
 
-                if(operatingSystem.Ram!=RamOS)
+                if (operatingSystem.Ram != RamOS)
                     operatingSystem.Ram = RamOS;
 
                 if (MyOperationSystem.Kvant != Kvant)
@@ -118,7 +150,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.T_IntrIO = T_IntrIO;
                 operatingSystem.T_Load = T_Load;
 
-                OsCost = (int)Math.Round((double)RamOS_ostatok / RamOS * 100);
+                OsCost = (100 - (int)Math.Round((double)RamOS_ostatok / RamOS * 100));
 
                 CompletedTasks = operatingSystem.CompetedTasks;
                 operatingSystem.D_InOut = D_InOut;
@@ -160,7 +192,8 @@ namespace OperationSystem_ModelApp.ViewModel
             get { return takt; }
             set
             {
-                if (takt != value){
+                if (takt != value)
+                {
                     takt = value;
                     OnPropertyChanged("Takt");
                 }
@@ -171,7 +204,8 @@ namespace OperationSystem_ModelApp.ViewModel
             get => _ramOS;
             set
             {
-                if(value != _ramOS) {
+                if (value != _ramOS)
+                {
                     _ramOS = value;
                     OnPropertyChanged("RamOS");
                 }
@@ -291,7 +325,8 @@ namespace OperationSystem_ModelApp.ViewModel
             get => _isVisableProperty;
             set
             {
-                if (value != _isVisableProperty){
+                if (value != _isVisableProperty)
+                {
                     _isVisableProperty = value;
                     OnPropertyChanged("IsVisableProperty");
                 }
@@ -300,8 +335,10 @@ namespace OperationSystem_ModelApp.ViewModel
         public MyProcess SelectedTask
         {
             get => selectedTask;
-            set {
-                if (selectedTask != value) {
+            set
+            {
+                if (selectedTask != value)
+                {
                     selectedTask = value;
                     OnPropertyChanged("SelectedTask");
                 }
@@ -321,7 +358,8 @@ namespace OperationSystem_ModelApp.ViewModel
             get => _countTasks;
             set
             {
-                if (_countTasks != value){
+                if (_countTasks != value)
+                {
                     _countTasks = value;
                     OnPropertyChanged("CountTasks");
                 }
@@ -351,12 +389,53 @@ namespace OperationSystem_ModelApp.ViewModel
                 }
             }
         }
+
+        private RelayCommand _parseCommand;
+        public RelayCommand ParseCommand
+        {
+            get
+            {
+                return _parseCommand ??
+                    (_parseCommand ?? new RelayCommand(obj =>
+                    {
+                        if (PathToFile == null)
+                            return;
+                        FileStream fs = new FileStream(PathToFile, FileMode.OpenOrCreate);
+                        try
+                        {
+                            var json = JsonSerializer.Deserialize<ParamsForOS>(fs);
+
+                            RamOS = json.Ram;
+                            T_next = json.TNext;
+                            T_IntiIO = json.TInitIO;
+                            T_IntrIO = json.TIntrIO;
+                            T_Load = json.TLoad;
+                            Kvant = json.Kvant;
+
+                            
+                            Debug.WriteLine($"  Ram:{json.Ram} Tload:{json.TLoad} Kvant:{json.Kvant} TinitIO:{json.TInitIO} TInitrIO:{json.TIntrIO} TNext:{json.TNext}");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка при парсинге файла!\nНужен JSON файл!\n Пример содержимого JSON файла:\n" +
+                                "{\r\n\t\"Ram\": 2048,\r\n\t\"TNext\": 3,\r\n\t\"TInitIO\": 4,\r\n\t\"TIntrIO\": 5,\r\n\t\"TLoad\": 6,\r\n\t\"Kvant\": 10\r\n}", 
+                                "Ошибка", 
+                                MessageBoxButton.OK);
+                        }
+                        finally
+                        {
+                            fs.Close();
+                        }
+                    }));
+            }
+        }
         public RelayCommand AutoAddTask
         {
             get
             {
                 return autoAddTask ??
-                    (autoAddTask = new RelayCommand(obj =>{
+                    (autoAddTask = new RelayCommand(obj =>
+                    {
                         lock (lockObject)
                         {
                             if (!isGenerating)
@@ -372,7 +451,8 @@ namespace OperationSystem_ModelApp.ViewModel
             get
             {
                 return offAutoAddTask ??
-                    (offAutoAddTask = new RelayCommand(obj =>{
+                    (offAutoAddTask = new RelayCommand(obj =>
+                    {
                         lock (lockObject) //Чтоб не было гонки на переключатель
                         {
                             if (isGenerating)
