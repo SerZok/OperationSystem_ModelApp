@@ -126,7 +126,7 @@
                     <Label Grid.Column="0" Content="Память (Kb)" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="1" Content="T_next" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="1" Content="Такты для запуска задачи" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding T_next}" Style="{StaticResource TextBoxAlign}"/>
 
                     <Label Grid.Column="0" Grid.Row="2" Content="T_InitIO" Style="{StaticResource LabelAlign}"/>
@@ -135,7 +135,7 @@
                     <Label Grid.Column="0" Grid.Row="3" Content="T_IntrIO" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding T_IntrIO}" Style="{StaticResource TextBoxAlign}"/>
 
-                    <Label Grid.Column="0" Grid.Row="4" Content="T_Load" Style="{StaticResource LabelAlign}"/>
+                    <Label Grid.Column="0" Grid.Row="4" Content="Т на загрузку нового задания" Style="{StaticResource LabelAlign}"/>
                     <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding T_Load}" Style="{StaticResource TextBoxAlign}"/>
 
                     <Label Grid.Column="0" Grid.Row="5" Content="Квант" Style="{StaticResource LabelAlign}"/>

@@ -17,6 +17,7 @@ namespace OperationSystem_ModelApp.Model
         Running,
         Completed,
         InputOutput,
+        InitIO,
         StartTask
     }
     internal class MyProcess: INotifyPropertyChanged

@@ -24,7 +24,7 @@ namespace OperationSystem_ModelApp.Model
          /// </summary>
         public static int Kvant;
         public int Takt { get; set; }
-        private int _ram = 1024;
+        private int _ram = 1024; 
         private int _ram_ost;
         public int Ram {
             get => _ram;
@@ -63,7 +63,7 @@ namespace OperationSystem_ModelApp.Model
                 if (_t_next != value)
                 {
                     _t_next = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged("T_next");
                 }
             }
         }
@@ -80,7 +80,7 @@ namespace OperationSystem_ModelApp.Model
                 if (_t_intiIO != value)
                 {
                     _t_intiIO = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged("T_IntiIO");
                 }
             }
         }
@@ -244,7 +244,7 @@ namespace OperationSystem_ModelApp.Model
             {
                 while (!cancellationToken.IsCancellationRequested) {
                     await LauncTask();
-                    await Task.Delay(100);
+                    await Task.Delay(10);
                 }
             }
             catch (TaskCanceledException e)
@@ -258,6 +258,11 @@ namespace OperationSystem_ModelApp.Model
         //Если процесс InputOutput, то надо следующую задачу
 
         private Task _ioTask; // Хранит фоновую задачу для InOut
+
+        /// <summary>
+        /// Мб Планировщик
+        /// </summary>
+        /// <returns></returns>
         public async Task LauncTask()
         {
             while (_Processes.Any())
@@ -270,7 +275,7 @@ namespace OperationSystem_ModelApp.Model
                     cpuState = CpuState.Working;
                     var proc = _Processes[i];
 
-                    if (proc.State == ProcessState.InputOutput) //Процесс занят IO
+                    if (proc.State == ProcessState.InputOutput || proc.State == ProcessState.InitIO) //Процесс занят IO
                     {
                         cpuState = CpuState.Waiting;
                         if (_ioTask == null || _ioTask.IsCompleted)
@@ -296,7 +301,9 @@ namespace OperationSystem_ModelApp.Model
                             if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
                             {
                                 IOList.Enqueue(proc.Id); //Добавляем ID задачи в список, которые обрабатываю IO
-                                proc.State = ProcessState.InputOutput;
+                                //proc.State = ProcessState.InputOutput;
+                                proc.State = ProcessState.InitIO;
+                                await Task.Delay(ConvertTaktToMillisec(T_IntiIO)); // Инициализация IO
                                 break;
                             }
                             else //Если команда не IO
