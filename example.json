@@ -1,0 +1,8 @@
+{
+	"Kvant": 40,
+	"Ram": 2048,
+	"TNext": 1,
+	"TInitIO":2,
+	"TIntrIO":3,
+	"TLoad":4
+}

@@ -62,6 +62,26 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        private int _procTakt;
+        public int ProcTakt { 
+            get=>_procTakt;
+            set
+            {
+                _procTakt = value;
+                OnPropertyChanged("ProcTakt");
+            }
+        }
+
+        async public Task DoTask(Command cmd, int speed)
+        {
+            //await Task.Delay( cmd.TypeCmd.timeTypeCommand;
+            ProcTakt = cmd.TypeCmd.timeTypeCommand;
+            while (ProcTakt > 0)
+            {
+                ProcTakt--;
+                await Task.Delay(speed);
+            }
+        }
 
         /// <summary>
         /// Состояние процесса (Готов, Выполняется, Завершен)

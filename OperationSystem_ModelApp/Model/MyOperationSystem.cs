@@ -222,7 +222,6 @@ namespace OperationSystem_ModelApp.Model
         }
         public int ConvertTaktToMillisec(int takt)
         {
-
             return takt * Speed;
         }
         public async void Generating(CancellationToken cancellationToken)   //Генерация заданий.
@@ -307,12 +306,16 @@ namespace OperationSystem_ModelApp.Model
                                 //proc.State = ProcessState.InputOutput;
                                 proc.State = ProcessState.InitIO;
                                 await Task.Delay(ConvertTaktToMillisec(T_IntiIO)); // Инициализация IO
+
+                                cpuState = CpuState.Waiting;
+
                                 break;
                             }
                             else //Если команда не IO
                             {
                                 proc.State = ProcessState.Running;
-                                await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                                //await Task.Delay(ConvertTaktToMillisec(fCommand.TypeCmd.timeTypeCommand));
+                                await proc.DoTask(fCommand, Speed);
                                 proc.Commands.Remove(fCommand);
                             }
                         }
@@ -351,8 +354,10 @@ namespace OperationSystem_ModelApp.Model
 
                         if (proc != null)
                         {
-                            await Task.Delay(ConvertTaktToMillisec(T_IntiIO)); // Эмуляция обработки IO
-                            proc.Commands.Remove(proc.Commands.First());
+                            //await Task.Delay(ConvertTaktToMillisec(TIO));
+                            var fCommand = proc.Commands.First();
+                            await proc.DoTask(fCommand, Speed);
+                            proc.Commands.Remove(fCommand);
                             // Если есть еще команды, процесс снова переходит в состояние Ready
                             if (proc.Commands.Any())
                                 proc.State = ProcessState.Ready;

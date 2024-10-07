@@ -33,10 +33,25 @@
             </Grid.RowDefinitions>
 
             <!--Кнопка запуска ОС-->
-            <Button Content="Запустить ОС" Command="{Binding StartOS}" Margin="10"  />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Content="Запустить ОС" Command="{Binding StartOS}" Margin="5"  />
+                <Button 
+                    Grid.Column="1" 
+                    Name="FromFile" 
+                    Click="FromFile_Click" 
+                    IsEnabled="{Binding IsEnabled}"
+                    Command="{Binding ParseCommand}" 
+                    Content="Из файла" 
+                    Margin="5" 
+                    />
+            </Grid>
 
             <!--Нижняя панель (не отображается ,если не запущена ОС)-->
-            <Grid Grid.RowSpan="2"  Visibility="{Binding IsVisableProperty}" >
+            <Grid Grid.RowSpan="2" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -79,7 +94,7 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button xml:space="preserve" Content="Загрузить &#13;новое задание" Command="{Binding ADDCommand}"  Margin="5" />
+                        <Button xml:space="preserve" Content="Загрузить &#13;новое задание" IsEnabled="{Binding IsVisableProperty}" Command="{Binding ADDCommand}"  Margin="5" />
                         <StackPanel Grid.Column="1" DockPanel.Dock="Right" Margin="5" Width="Auto">
                             <Label Content="Кол-во комманд"/>
                             <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="{Binding NumToBeCreate}" Height="30"/>
@@ -87,10 +102,10 @@
                     </Grid>
                     
                     <Label                          Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Авто-генерация "/>
-                    <RadioButton    Grid.Column="0" Grid.Row="2" Content="Включить"  VerticalAlignment="Top" HorizontalAlignment="Center" Command="{Binding AutoAddTask}"/>
-                    <RadioButton    Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
+                    <RadioButton IsEnabled="{Binding IsVisableProperty}"    Grid.Column="0" Grid.Row="2" Content="Включить"  VerticalAlignment="Top" HorizontalAlignment="Center" Command="{Binding AutoAddTask}"/>
+                    <RadioButton IsEnabled="{Binding IsVisableProperty}"   Grid.Column="1" Grid.Row="2" Content="Выключить" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="True"  Command="{Binding OffAutoAddTask}"/>
 
-                    <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="#111" BorderThickness="2">
+                    <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="#111" BorderThickness="2" Height="30">
                         <DockPanel Grid.Row="3" Grid.ColumnSpan="2" Background="#696969">
                             <Label DockPanel.Dock="Left" Content="IO команд %"/>
                             <Slider TickPlacement="BottomRight" Minimum="0" Maximum="100" TickFrequency="20" IsSnapToTickEnabled="True" Value="{Binding D_InOut}"/>
@@ -121,36 +136,28 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+
                     </Grid.RowDefinitions>
 
                     <Label Grid.Column="0" Content="Память (Kb)" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Text="{Binding RamOS}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
 
                     <Label Grid.Column="0" Grid.Row="1" Content="Тактов для запуска задач" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding T_next}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding T_next}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
 
                     <Label Grid.Column="0" Grid.Row="2" Content="Тактов для запуска IO" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding T_IntiIO}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding T_IntiIO}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
 
                     <Label Grid.Column="0" Grid.Row="3" Content="Таков для прерывания IO" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding T_IntrIO}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding T_IntrIO}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
 
                     <Label Grid.Column="0" Grid.Row="4" Content="Таков для загрузки" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding T_Load}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding T_Load}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
 
                     <Label Grid.Column="0" Grid.Row="5" Content="Квант" Style="{StaticResource LabelAlign}"/>
-                    <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding Kvant}" Style="{StaticResource TextBoxAlign}"/>
+                    <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding Kvant}" Style="{StaticResource TextBoxAlign}" IsReadOnly="{Binding IsVisableProperty}"/>
                 </Grid>
-
-                <Grid Grid.Row="5" Height="35" Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Button Name="FromFile" Click="FromFile_Click" Command="{Binding ParseCommand}" Content="Из файла" Margin="5,0,5,0" />
-                    <Button Grid.Column="1" Content="Применить" Margin="5,0,5,0"/>
-                </Grid>
-                <Button Grid.Row="6" Content="Выполнить все процессы &#x0a; и выключить ОС" Command="{Binding StopOS}" Margin="10" />
+                <Button Grid.Row="5" Content="Выключить ОС" Command="{Binding StopOS}" Margin="10" Height="30"/>
             </Grid> <!--/Нижняя панель-->
         </Grid>
 
@@ -162,6 +169,7 @@
                         <DataGridTextColumn Width="Auto" Header="ID" Binding="{Binding Id}"/>
                         <DataGridTextColumn Width="150"  Header="ОЗУ" Binding="{Binding Ram}"/>
                         <DataGridTextColumn Header="Состояние" Binding="{Binding State}"/>
+                        <DataGridTextColumn Header="Такты" Binding="{Binding ProcTakt}"/>
                         <DataGridTextColumn Header="Команд на выполнение" Binding="{Binding Commands.Count}"/>
                         <DataGridTextColumn Header="Всего команд" Binding="{Binding CountAllCommands}"/>
                     </DataGrid.Columns>

@@ -30,7 +30,7 @@ namespace OperationSystem_ModelApp.ViewModel
         private bool isGenerating;                  //Bool для переключателя
         private Thread threadForOS, threadForUI;    //Потоки для обновления и генерации в цикле
         private int downloadCountTasks;             //Количество задач, которые выполняются
-        private Visibility _isVisableProperty;
+        private bool _isVisableProperty;
         private MyProcess selectedTask;             //Выбарнная задача
         private int _ramOS;                         //ОЗУ ОС
         private int _ramOS_ostatok;
@@ -51,11 +51,19 @@ namespace OperationSystem_ModelApp.ViewModel
         private int _competedTasks;
         private int _d_InOut;
         private string _pathToFile;
-
+        private bool _IsEnabled;
+        public bool IsEnabled
+        {
+            get=> _IsEnabled;
+            set
+            {
+                _IsEnabled = value;
+                OnPropertyChanged("IsEnabled");
+            }
+        }
         public string PathToFile { get => _pathToFile; set => _pathToFile = value; }
 
         public RelayCommand Test { get; }
-
 
         private int t_next;
         private int t_IntiIO;
@@ -77,7 +85,8 @@ namespace OperationSystem_ModelApp.ViewModel
             _stopwatch = new Stopwatch();
             ProcessesOS = operatingSystem._Processes;
             IsGenerating = false;
-            IsVisableProperty = Visibility.Hidden;
+            IsVisableProperty = false;
+            IsEnabled = true;
             lockObject = new object();
 
             RamOS = 1024;
@@ -132,10 +141,10 @@ namespace OperationSystem_ModelApp.ViewModel
                 StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
                 CPU_State = "Состояние ЦП: " + Enum.GetName(typeof(CpuState), operatingSystem.cpuState);
 
-                if (RamOS == 0)
-                    IsVisableProperty = Visibility.Hidden;
-                else
-                    IsVisableProperty = Visibility.Visible;
+                //if (RamOS == 0)
+                //    IsVisableProperty = false;
+                //else
+                //    IsVisableProperty = true;
 
                 if (operatingSystem.Ram != RamOS)
                     operatingSystem.Ram = RamOS;
@@ -320,7 +329,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 OnPropertyChanged("CompletedTasks");
             }
         }
-        public Visibility IsVisableProperty
+        public bool IsVisableProperty
         {
             get => _isVisableProperty;
             set
@@ -391,6 +400,7 @@ namespace OperationSystem_ModelApp.ViewModel
         }
 
         private RelayCommand _parseCommand;
+
         public RelayCommand ParseCommand
         {
             get
@@ -474,7 +484,8 @@ namespace OperationSystem_ModelApp.ViewModel
                         {
                             threadForOS.Start();
                             threadForUI.Start();
-                            IsVisableProperty = Visibility.Visible;
+                            IsVisableProperty = true;
+                            IsEnabled = false;
                             firstLaunch = false;
                             _stopwatch.Start();
 

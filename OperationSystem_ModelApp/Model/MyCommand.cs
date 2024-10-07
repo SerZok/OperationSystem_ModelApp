@@ -62,7 +62,7 @@ namespace OperationSystem_ModelApp.Model
                     break;
 
                 case NameTypeCommand.IO:
-                    timeTypeCommand = 6;
+                    timeTypeCommand = 50;
                     sizeTypeCommand = 5;
                     break;
 
