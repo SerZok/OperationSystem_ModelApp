@@ -94,10 +94,23 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button xml:space="preserve" Content="Загрузить &#13;новое задание" IsEnabled="{Binding IsVisableProperty}" Command="{Binding ADDCommand}"  Margin="5" />
+                        <Button 
+                            xml:space="preserve"
+                            Content="Загрузить &#13;новое задание"
+                            IsEnabled="{Binding IsVisableProperty}" 
+                            Command="{Binding ADDCommand}"  
+                            Margin="10" 
+                            />
+                        
                         <StackPanel Grid.Column="1" DockPanel.Dock="Right" Margin="5" Width="Auto">
                             <Label Content="Кол-во комманд"/>
-                            <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="{Binding NumToBeCreate}" Height="30"/>
+                            <TextBox 
+                                IsEnabled="{Binding IsVisableProperty}" 
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center" 
+                                Text="{Binding NumToBeCreate}" 
+                                Height="30"
+                                />
                         </StackPanel>
                     </Grid>
                     
