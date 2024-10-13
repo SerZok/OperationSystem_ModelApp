@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OperationSystem_ModelApp.Model
@@ -11,7 +12,7 @@ namespace OperationSystem_ModelApp.Model
     {
         private int id;
         private Random rnd;
-        public TypeCommand TypeCmd { get; private set; }
+        public TypeCommand TypeCmd { get;  set; }
         public int Id
         {
             get => id;
@@ -21,6 +22,14 @@ namespace OperationSystem_ModelApp.Model
             }
         }
         private bool _islast;
+
+        [JsonConstructor]
+        public Command(int i, TypeCommand type)
+        {
+            Id = i;
+            TypeCmd = type;
+        }
+
         public Command(bool islast, bool isIO=false)
         {
             rnd = new Random();
@@ -45,6 +54,7 @@ namespace OperationSystem_ModelApp.Model
         }
     }
     public enum NameTypeCommand { Close, IO, Arithmetic, IDK }
+
     public struct TypeCommand
     {
         public NameTypeCommand nameTypeCommand;

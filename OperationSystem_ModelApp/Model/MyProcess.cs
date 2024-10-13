@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -101,6 +102,13 @@ namespace OperationSystem_ModelApp.Model
         }
 
         static public int DInOut {get; set;}
+
+        
+        public MyProcess(int i, ObservableCollection<Command> commands)
+        {
+            Id = i;
+            Commands = commands;
+        }
         public MyProcess()
         {
             Id = _count;

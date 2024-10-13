@@ -54,7 +54,7 @@ namespace OperationSystem_ModelApp.ViewModel
         private bool _IsEnabled;
         public bool IsEnabled
         {
-            get=> _IsEnabled;
+            get => _IsEnabled;
             set
             {
                 _IsEnabled = value;
@@ -63,7 +63,6 @@ namespace OperationSystem_ModelApp.ViewModel
         }
         public string PathToFile { get => _pathToFile; set => _pathToFile = value; }
 
-        public RelayCommand Test { get; }
 
         private int t_next;
         private int t_IntiIO;
@@ -116,8 +115,9 @@ namespace OperationSystem_ModelApp.ViewModel
             public int TIntrIO { get; set; }
             public int TLoad { get; set; }
             public int Kvant { get; set; }
+            public List<MyProcess> Tests { get; set; }
 
-            public ParamsForOS(int ram, int tnext, int tinitio, int tintrio, int tload, int kvant)
+            public ParamsForOS(int ram, int tnext, int tinitio, int tintrio, int tload, int kvant, List<MyProcess> tests)
             {
                 Ram = ram;
                 TNext = tnext;
@@ -125,7 +125,18 @@ namespace OperationSystem_ModelApp.ViewModel
                 TIntrIO = tintrio;
                 TLoad = tload;
                 Kvant = kvant;
+                Tests = tests;
+            }
+        }
 
+        public class Test
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+            public Test(int iD, string name)
+            {
+                ID = iD;
+                Name = name;
             }
         }
 
@@ -410,31 +421,51 @@ namespace OperationSystem_ModelApp.ViewModel
                     {
                         if (PathToFile == null)
                             return;
-                        FileStream fs = new FileStream(PathToFile, FileMode.OpenOrCreate);
-                        try
-                        {
-                            var json = JsonSerializer.Deserialize<ParamsForOS>(fs);
 
-                            RamOS = json.Ram;
-                            T_next = json.TNext;
-                            T_IntiIO = json.TInitIO;
-                            T_IntrIO = json.TIntrIO;
-                            T_Load = json.TLoad;
-                            Kvant = json.Kvant;
+                        using (FileStream fs = new FileStream(PathToFile, FileMode.OpenOrCreate))
+                        {
+                            try
+                            {
 
-                            
-                            Debug.WriteLine($"  Ram:{json.Ram} Tload:{json.TLoad} Kvant:{json.Kvant} TinitIO:{json.TInitIO} TInitrIO:{json.TIntrIO} TNext:{json.TNext}");
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Ошибка при парсинге файла!\nНужен JSON файл!\n Пример содержимого JSON файла:\n" +
-                                "{\r\n\t\"Ram\": 2048,\r\n\t\"TNext\": 3,\r\n\t\"TInitIO\": 4,\r\n\t\"TIntrIO\": 5,\r\n\t\"TLoad\": 6,\r\n\t\"Kvant\": 10\r\n}", 
-                                "Ошибка", 
-                                MessageBoxButton.OK);
-                        }
-                        finally
-                        {
-                            fs.Close();
+                                var options = new JsonSerializerOptions
+                                {
+                                    IncludeFields = true // Включение десериализации полей
+                                };
+
+                                var json = JsonSerializer.Deserialize<ParamsForOS>(fs, options);
+                                //var json = JsonSerializer.Deserialize<ParamsForOS>(fs);
+
+                                if (json != null)
+                                {
+
+                                    RamOS = json.Ram;
+                                    T_next = json.TNext;
+                                    T_IntiIO = json.TInitIO;
+                                    T_IntrIO = json.TIntrIO;
+                                    T_Load = json.TLoad;
+                                    Kvant = json.Kvant;
+                                    
+                                    Debug.WriteLine($"  Ram:{json.Ram} Tload:{json.TLoad} Kvant:{json.Kvant} TinitIO:{json.TInitIO} TInitrIO:{json.TIntrIO} TNext:{json.TNext}");
+                                    foreach(var pro in json.Tests)
+                                    {
+                                        Debug.WriteLine(pro.Id);
+                                        
+                                    }
+
+                                }
+                                else
+                                {
+                                    Debug.WriteLine("Ошибка десириализации!");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                //MessageBox.Show("Ошибка при парсинге файла!\nНужен JSON файл!\n Пример содержимого JSON файла:\n" +
+                                //    "{\r\n\t\"Ram\": 2048,\r\n\t\"TNext\": 3,\r\n\t\"TInitIO\": 4,\r\n\t\"TIntrIO\": 5,\r\n\t\"TLoad\": 6,\r\n\t\"Kvant\": 10\r\n}",
+                                //    "Ошибка",
+                                //    MessageBoxButton.OK);
+                                MessageBox.Show($"{ex}");
+                            }
                         }
                     }));
             }

@@ -2,7 +2,20 @@
 	"Kvant": 40,
 	"Ram": 2048,
 	"TNext": 1,
-	"TInitIO":2,
-	"TIntrIO":3,
-	"TLoad":4
+	"TInitIO": 2,
+	"TIntrIO": 3,
+	"TLoad": 4,
+	"Tests": [
+		{
+			"Id": 1,
+			"Commands": [
+				{
+					"Id": 1,
+					"TypeCmd": {
+						"nameTypeCommand": IO
+					}
+				}
+			]
+		}
+	]
 }
