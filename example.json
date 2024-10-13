@@ -1,21 +1,76 @@
 {
-	"Kvant": 40,
-	"Ram": 2048,
-	"TNext": 1,
-	"TInitIO": 2,
-	"TIntrIO": 3,
-	"TLoad": 4,
-	"Tests": [
-		{
-			"Id": 1,
-			"Commands": [
-				{
-					"Id": 1,
-					"TypeCmd": {
-						"nameTypeCommand": IO
+    "Kvant": 40,
+    "Ram": 2048,
+    "TNext": 1,
+    "TInitIO": 2,
+    "TIntrIO": 3,
+    "TLoad": 4,
+    "Tasks": [
+        {
+            "Id": 1,
+            "Commands": [
+                {
+					"TypeCmd": { 
+						"nameTypeCommand": 2,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 10
 					}
-				}
-			]
-		}
-	]
+                },
+				{
+					"TypeCmd": { 
+						"nameTypeCommand": 2,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 10
+					}
+				},
+				{
+					"TypeCmd": { 
+						"nameTypeCommand": 1,
+						"timeTypeCommand": 50,
+						"sizeTypeCommand": 10
+					}
+				},
+				{
+					"TypeCmd": { 
+						"nameTypeCommand": 0,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 10
+					}
+				}					
+            ]
+        },
+        {
+           "Id": 2,
+            "Commands": [
+                {
+					"TypeCmd": { 
+						"nameTypeCommand": 2,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 100
+					}
+                },
+				{
+					"TypeCmd": { 
+						"nameTypeCommand": 2,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 100
+					}
+				},
+				{
+				"TypeCmd": { 
+						"nameTypeCommand": 1,
+						"timeTypeCommand": 50,
+						"sizeTypeCommand": 200
+					}
+				},
+				{
+					"TypeCmd": { 
+						"nameTypeCommand": 0,
+						"timeTypeCommand": 10,
+						"sizeTypeCommand": 300
+					}
+				}					
+            ]
+        }		
+    ]
 }

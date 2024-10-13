@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,7 +38,7 @@ namespace OperationSystem_ModelApp.Model
         /// <summary>
         /// Список команд, которые надо выполнить
         /// </summary>
-        public ObservableCollection<Command> Commands { get; set; } = new ObservableCollection<Command>();
+        public ObservableCollection<Command> Commands { get; set; }
 
         private int countCommands;
         private int _countAllCommands;
@@ -102,15 +102,15 @@ namespace OperationSystem_ModelApp.Model
         }
 
         static public int DInOut {get; set;}
-
-        
-        public MyProcess(int i, ObservableCollection<Command> commands)
+        public MyProcess(int i, List<Command> commands)
+            //для парсинга JSON 
         {
             Id = i;
-            Commands = commands;
+            Commands = new ObservableCollection<Command>(commands);
         }
         public MyProcess()
         {
+            Commands = new ObservableCollection<Command>();
             Id = _count;
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
             CountAllCommands = countCommands;
@@ -142,11 +142,10 @@ namespace OperationSystem_ModelApp.Model
             }
             State = ProcessState.Ready;
         }
-
         public MyProcess(int countCom)
         {
+            Commands = new ObservableCollection<Command>();
             Id = _count;
-
             countCommands = countCom;
             CountAllCommands = countCommands;
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);

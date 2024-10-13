@@ -38,7 +38,12 @@
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Button Content="Запустить ОС" Command="{Binding StartOS}" Margin="5"  />
+                <Button 
+                    Content="Запустить ОС" 
+                    Command="{Binding StartOS}"
+                    IsEnabled="{Binding IsEnabled}"
+                    Margin="5"  />
+                
                 <Button 
                     Grid.Column="1" 
                     Name="FromFile" 

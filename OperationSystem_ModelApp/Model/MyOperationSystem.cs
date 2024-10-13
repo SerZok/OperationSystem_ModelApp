@@ -180,7 +180,7 @@ namespace OperationSystem_ModelApp.Model
 
             Speed = 250;
             T_next = 1;
-            T_IntiIO = 40; //Желательно чтоб было дольше самого кванта
+            T_IntiIO = 40;
             T_IntrIO = 3;
             T_Load = 4;
         }
@@ -366,45 +366,6 @@ namespace OperationSystem_ModelApp.Model
 
 
         }
-
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Асинхронная блокировка
-        //private async Task InOut()
-        //{
-        //    await _semaphore.WaitAsync();
-        //    try
-        //    {
-        //        var procList = _Processes.ToList();
-        //        while (IOList.Any() && _Processes.Any())
-        //        {
-        //            cpuState = CpuState.Waiting;
-        //            if (IOList.TryDequeue(out var id)) // Потокобезопасное удаление задачи
-        //            {
-        //                var proc = _Processes.FirstOrDefault(x => x.Id == id);
-
-        //                if (proc != null)
-        //                {
-        //                    //await Task.Delay(ConvertTaktToMillisec(TIO));
-        //                    var fCommand = proc.Commands.First();
-        //                    await proc.DoTask(fCommand, Speed);
-        //                    proc.Commands.Remove(fCommand);
-        //                    // Если есть еще команды, процесс снова переходит в состояние Ready
-        //                    if (proc.Commands.Any())
-        //                        proc.State = ProcessState.Ready;
-        //                    else
-        //                        proc.State = ProcessState.Completed; // Помечаем процесс завершенным, если все команды завершены
-        //                }
-        //            }
-        //            cpuState = CpuState.Working;
-        //            await Task.Delay(ConvertTaktToMillisec(T_IntrIO));
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        _semaphore.Release();
-        //    }
-        //}
-
-
 
         //Старт проверки ОЗУ
         private async void StartRamCheck(CancellationToken cancellationToken)

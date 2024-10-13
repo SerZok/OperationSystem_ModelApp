@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -10,26 +10,15 @@ namespace OperationSystem_ModelApp.Model
 {
     public class Command
     {
-        private int id;
         private Random rnd;
         public TypeCommand TypeCmd { get;  set; }
-        public int Id
-        {
-            get => id;
-            set
-            {
-                id++;
-            }
-        }
+
         private bool _islast;
-
-        [JsonConstructor]
-        public Command(int i, TypeCommand type)
+        public Command() {  }
+        public Command(TypeCommand typeCommand)
         {
-            Id = i;
-            TypeCmd = type;
+            TypeCmd= typeCommand;
         }
-
         public Command(bool islast, bool isIO=false)
         {
             rnd = new Random();
@@ -53,13 +42,13 @@ namespace OperationSystem_ModelApp.Model
             }
         }
     }
-    public enum NameTypeCommand { Close, IO, Arithmetic, IDK }
+    public enum NameTypeCommand { Close, IO, Arithmetic }
 
-    public struct TypeCommand
+    public class TypeCommand
     {
-        public NameTypeCommand nameTypeCommand;
-        public int timeTypeCommand;
-        public int sizeTypeCommand;
+        public NameTypeCommand nameTypeCommand { get; set; }
+        public int timeTypeCommand { get; set; }
+        public int sizeTypeCommand { get; set; }
 
         public TypeCommand(NameTypeCommand name)
         {
@@ -89,11 +78,38 @@ namespace OperationSystem_ModelApp.Model
             //Если надо посмотреть как генерируется
             Debug.WriteLine($"Command {nameTypeCommand}: Time:{timeTypeCommand} Size:{sizeTypeCommand}");
         }
+
         public TypeCommand()
         {
-            nameTypeCommand = NameTypeCommand.IDK;
-            timeTypeCommand = 10;
-            sizeTypeCommand = 10;
+           switch (nameTypeCommand)
+            {
+                case NameTypeCommand.Close:
+                    timeTypeCommand = 0;
+                    sizeTypeCommand = 0;
+                    break;
+
+                case NameTypeCommand.IO:
+                    timeTypeCommand = 50;
+                    sizeTypeCommand = 5;
+                    break;
+
+                case NameTypeCommand.Arithmetic:
+                    timeTypeCommand = 4;
+                    sizeTypeCommand = 4;
+                    break;
+
+                default:
+                    timeTypeCommand = 1;
+                    sizeTypeCommand = 1;
+                    break;
+            }
+        }
+
+        public TypeCommand(NameTypeCommand nameTypeCommand, int timeTypeCommand, int sizeTypeCommand)
+        {
+            this.nameTypeCommand = nameTypeCommand;
+            this.timeTypeCommand = timeTypeCommand;
+            this.sizeTypeCommand = sizeTypeCommand;
         }
     }
 }
