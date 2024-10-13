@@ -1,4 +1,5 @@
-![image](https://github.com/user-attachments/assets/07f06479-6b7e-4d29-bd64-68ca9d4fc13d)
+![image](https://github.com/user-attachments/assets/3c8172ec-9915-48c5-898f-cdf5a2eeea7b)
+
 TODO:
 1. Обработка прерываний и регулировщик
 2. Расчет параметров модели (разобраться в однопрограммном и мультипрограммном режимах)
