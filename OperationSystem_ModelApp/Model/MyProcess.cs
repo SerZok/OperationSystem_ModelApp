@@ -115,7 +115,16 @@ namespace OperationSystem_ModelApp.Model
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
             CountAllCommands = countCommands;
 
+            Debug.WriteLine($"*********Task #{id} **********");
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
+
+            // Генерация случайных индексов для команд IO
+            HashSet<int> ioIndices = new HashSet<int>();
+            while (ioIndices.Count < ioCommandCount)
+            {
+                int randomIndex = rnd.Next(1, countCommands - 1); // Исключаем последний индекс (последняя команда - Close)
+                ioIndices.Add(randomIndex);  // HashSet предотвращает дублирование индексов
+            }
 
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
@@ -127,7 +136,7 @@ namespace OperationSystem_ModelApp.Model
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
                 }
-                while (ioCommandCount>0)
+                if (ioIndices.Contains(i))
                 {
                     var IOcommand = new Command(false,true);
                     Ram += IOcommand.TypeCmd.sizeTypeCommand;
@@ -150,6 +159,14 @@ namespace OperationSystem_ModelApp.Model
             CountAllCommands = countCommands;
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
 
+            // Генерация случайных индексов для команд IO
+            HashSet<int> ioIndices = new HashSet<int>();
+            while (ioIndices.Count < ioCommandCount)
+            {
+                int randomIndex = rnd.Next(1, countCommands - 1); // Исключаем последний индекс (последняя команда - Close)
+                ioIndices.Add(randomIndex);  // HashSet предотвращает дублирование индексов
+            }
+
             Debug.WriteLine($"*********Task #{id} **********");
             //Генерация команд
             for (int i = 1; i <= countCommands; i++)
@@ -161,7 +178,7 @@ namespace OperationSystem_ModelApp.Model
                     Ram += commandLast.TypeCmd.sizeTypeCommand;
                     break;
                 }
-                while (ioCommandCount > 0)
+                if (ioIndices.Contains(i))
                 {
                     var IOcommand = new Command(false, true);
                     Ram += IOcommand.TypeCmd.sizeTypeCommand;
