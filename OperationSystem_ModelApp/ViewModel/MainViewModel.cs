@@ -217,7 +217,6 @@ namespace OperationSystem_ModelApp.ViewModel
                     OnPropertyChanged("RamOS");
                 }
             }
-
         }
         public int RamOS_ostatok
         {

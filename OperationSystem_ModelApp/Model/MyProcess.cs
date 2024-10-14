@@ -29,6 +29,9 @@ namespace OperationSystem_ModelApp.Model
         private int id;
         private static int _count = 0;
 
+        //флаг на удаление
+        public bool needDelete = false;
+
         /// <summary>
         /// Количество памяти для выполнения задания;
         /// Сумма памяти команд
@@ -101,7 +104,7 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        static public int DInOut {get; set;}
+        static public int DInOut { get; set;}
         public MyProcess(int i, List<Command> commands)
             //для парсинга JSON 
         {
