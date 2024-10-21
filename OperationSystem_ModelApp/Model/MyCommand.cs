@@ -66,7 +66,7 @@ namespace OperationSystem_ModelApp.Model
                     break;
 
                 case NameTypeCommand.Arithmetic:
-                    timeTypeCommand = 4;
+                    timeTypeCommand = 1;
                     sizeTypeCommand = 4;
                     break;
 

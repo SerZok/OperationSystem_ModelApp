@@ -137,7 +137,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 CountListTasks = operatingSystem._listMyPros.Count;
                 RamOS_ostatok = operatingSystem.Ram_ost;
                 StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
-                CPU_State = "Состояние ЦП: " + Enum.GetName(typeof(CpuState), operatingSystem.cpuState);
+                CPU_State = "Состояние ЦП: " + Enum.GetName(typeof(CpuState), operatingSystem.myCPU.cpuState);
 
                 //if (RamOS == 0)
                 //    IsVisableProperty = false;

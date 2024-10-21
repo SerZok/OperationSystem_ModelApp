@@ -16,6 +16,7 @@ namespace OperationSystem_ModelApp.Model
     {
         Ready,
         Running,
+        Paused,
         Completed,
         InputOutput,
         Init_IO,
@@ -77,17 +78,52 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        async public Task DoTask(Command cmd, int speed, bool isThread=false)
+        private int _currentCommandIndex = 0;
+        public int CurrentCommandIndex
         {
+            get => _currentCommandIndex;
+            set
+            {
+                _currentCommandIndex = value;
+                OnPropertyChanged("CurrentCommandIndex");
+            }
+        }
+
+        private int psw;
+        public int PSW
+        {
+            get => psw;
+            set
+            {
+                psw = value;
+                OnPropertyChanged("PSW");
+            }
+        }
+
+        /// <summary>
+        /// Выполнение команды с возможностью остановки по завершении кванта
+        /// </summary>
+        /// <param name="cmd">Команда для выполнения</param>
+        /// <param name="speed">Скорость выполнения (в тактах)</param>
+        /// <param name="maxTakts">Максимум тактов для выполнения (квант)</param>
+        /// <returns>Количество потраченных тактов</returns>
+        async public Task<int> DoTask(Command cmd, int speed, int maxTakts, bool isThread = false)
+        {
+            int taktsUsed = 0;
             ProcTakt = cmd.TypeCmd.timeTypeCommand;
-            while (ProcTakt > 0)
+
+            while (ProcTakt > 0 && taktsUsed < maxTakts)
             {
                 ProcTakt--;
-                if (isThread) 
+                taktsUsed++;
+
+                if (isThread)
                     Thread.Sleep(speed);
                 else
                     await Task.Delay(speed);
             }
+
+            return taktsUsed; // Возвращаем количество использованных тактов
         }
 
         /// <summary>

@@ -15,7 +15,6 @@ using System.Collections.Concurrent;
 
 namespace OperationSystem_ModelApp.Model
 {
-    public enum CpuState { Waiting, Working }
     class MyOperationSystem : INotifyPropertyChanged
     {    /// <summary>
          /// Сколько тактов в 1 кванте;
@@ -55,6 +54,7 @@ namespace OperationSystem_ModelApp.Model
                 OnPropertyChanged("D_InOut");
             }
         }
+
 
         /// <summary>
         /// Такты для запуска задачи
@@ -160,7 +160,7 @@ namespace OperationSystem_ModelApp.Model
         public ObservableCollection<MyProcess> _listMyPros;
         public List<int> IOList;
 
-        public CpuState cpuState;
+        
 
         private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
         private CancellationTokenSource _cancellationTokenSourceTasks; //Для проверки запуска заданий
@@ -179,7 +179,7 @@ namespace OperationSystem_ModelApp.Model
 
             StartLauncTask(_cancellationTokenSourceTasks.Token);
             StartRamCheck(_cancellationTokenSource.Token);
-            cpuState = CpuState.Waiting;
+            myCPU.cpuState = CpuState.Waiting;
 
             Speed = 250;
             T_next = 1;
@@ -202,7 +202,7 @@ namespace OperationSystem_ModelApp.Model
             else
                 proc = new MyProcess(CountCommand);
 
-            if (_ram_ost >= proc.Ram)
+            if (_ram_ost >= proc.Ram && myCPU.cpuState ==CpuState.Waiting)
             {
                 _Processes.Add(proc);
                 _ram_ost -= proc.Ram;
@@ -213,7 +213,6 @@ namespace OperationSystem_ModelApp.Model
             }
 
         }
-
         public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection процесс
         {
             proc.needDelete = true;
@@ -276,35 +275,56 @@ namespace OperationSystem_ModelApp.Model
 
                 for (int i = 0; i < _Processes.Count; i++)
                 {
-                    cpuState = CpuState.Working;
+                    myCPU.cpuState = CpuState.Working;
                     var proc = _Processes[i];
                     bool isIO = (proc.State == ProcessState.InputOutput || proc.State == ProcessState.Init_IO || proc.State == ProcessState.End_IO);
 
                     //Если надо удалить процесс
                     if (proc.needDelete && !isIO)
                     {
-                            proc.State = ProcessState.Completed;
-                            _Processes.Remove(proc);
-                            break;
+                        proc.State = ProcessState.Completed;
+                        _Processes.Remove(proc);
+                        _ram_ost += proc.Ram;
+                        break;
                     }
 
                     if (isIO) //Процесс занят IO
                     {
-                        cpuState = CpuState.Waiting;
+                        myCPU.cpuState = CpuState.Waiting;
                         continue;
                     }
                     else
                     {
-                        myCPU.Execute(proc);
+                        await myCPU.Execute(proc);
+
+                        // Проверка, завершил ли процесс выполнение всех команд
+                        if (proc.State == ProcessState.Paused)
+                        {
+                            MessageBox.Show("Квант закончился!");
+                            proc.PSW = proc.CurrentCommandIndex;
+                            // Возвращаем процесс в список готовых задач
+                            proc.State = ProcessState.Ready;
+                            // ЦП уходит в ожидание после паузы
+                            myCPU.cpuState = CpuState.Waiting;
+                        }
+                        else if (proc.State == ProcessState.Completed)
+                        {
+                            // Процесс завершен, его больше не нужно планировать
+                            _Processes.Remove(proc);
+                            _ram_ost += proc.Ram;
+                            myCPU.cpuState = CpuState.Waiting;
+                        }
+
+                        // Прерываем цикл после обработки одного процесса
                         break;
                     }
-
                 }
+                myCPU.cpuState = CpuState.Waiting;
+
             }
         }
         //
         //в PSW счетчик команд
-
 
 
         //Старт проверки ОЗУ
@@ -329,7 +349,7 @@ namespace OperationSystem_ModelApp.Model
         //+ если процессор ожидает.
         public void CheckRam()
         {
-            if (_ram_ost > 0 && cpuState == CpuState.Waiting)
+            if (_ram_ost > 0 && myCPU.cpuState == CpuState.Waiting)
             {
                 while (_listMyPros.Count > 0)
                 {
