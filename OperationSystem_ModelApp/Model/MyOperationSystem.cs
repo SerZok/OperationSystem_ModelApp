@@ -225,7 +225,7 @@ namespace OperationSystem_ModelApp.Model
                 Thread.Sleep(Speed);
             }
         }
-        public static int ConvertTaktToMillisec(int takt, int speed)
+        public int ConvertTaktToMillisec(int takt, int speed)
         {
             return takt * speed;
         }

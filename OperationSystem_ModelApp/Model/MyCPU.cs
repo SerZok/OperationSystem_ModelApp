@@ -32,7 +32,7 @@ namespace OperationSystem_ModelApp.Model
 
 
                 proc.State = ProcessState.StartTask;
-                await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_next));
+                await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_next, myOS.Speed));
 
                 // Счетчик оставшегося времени на выполнение (в тактах)
                 var remainingKvant = MyOperationSystem.Kvant;
@@ -55,7 +55,7 @@ namespace OperationSystem_ModelApp.Model
                     {
                         proc.State = ProcessState.Init_IO;
                         myOS.IOList.Add(proc.Id);
-                        await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_IntiIO)); // Инициализация IO
+                        await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_IntiIO, myOS.Speed)); // Инициализация IO
                         new Thread(() => InOut()).Start();
                         cpuState = CpuState.Waiting;
                         break;  // Прерываем цикл при инициализации IO
@@ -121,7 +121,7 @@ namespace OperationSystem_ModelApp.Model
                 proc.Commands.Remove(fCommand);
 
                 proc.State = ProcessState.End_IO;
-                Thread.Sleep(myOS.ConvertTaktToMillisec(myOS.T_IntrIO));
+                Thread.Sleep(myOS.ConvertTaktToMillisec(myOS.T_IntrIO, myOS.Speed));
 
                 if (proc.Commands.Any())
                     proc.State = ProcessState.Ready;
