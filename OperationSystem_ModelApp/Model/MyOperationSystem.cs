@@ -225,9 +225,9 @@ namespace OperationSystem_ModelApp.Model
                 Thread.Sleep(Speed);
             }
         }
-        public int ConvertTaktToMillisec(int takt)
+        public static int ConvertTaktToMillisec(int takt, int speed)
         {
-            return takt * Speed;
+            return takt * speed;
         }
         public async void Generating(CancellationToken cancellationToken)   //Генерация заданий.
         {
@@ -261,8 +261,6 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
-        private Task _ioTask; // Хранит фоновую задачу для InOut
-
         /// <summary>
         /// Планировщик
         /// </summary>
@@ -271,7 +269,7 @@ namespace OperationSystem_ModelApp.Model
             while (_Processes.Any())
             {
                 //Загрузка задачи
-                await Task.Delay(ConvertTaktToMillisec(T_Load));
+                await Task.Delay(ConvertTaktToMillisec(T_Load,Speed));
 
                 for (int i = 0; i < _Processes.Count; i++)
                 {
@@ -323,8 +321,6 @@ namespace OperationSystem_ModelApp.Model
 
             }
         }
-        //
-        //в PSW счетчик команд
 
 
         //Старт проверки ОЗУ
