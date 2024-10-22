@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Text.Json;
 using OperationSystem_ModelApp.Model;
-using static System.Net.Mime.MediaTypeNames;
 using System.IO;
 using System.Runtime.Intrinsics.Arm;
 using System.Xml.Linq;
