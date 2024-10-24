@@ -194,26 +194,17 @@ namespace OperationSystem_ModelApp.Model
 
             if (CountCommand < 2)
             {
-                MessageBox.Show("Для задачи нужно как минимум 2 команды.\nЗадание будет сгенерировано со случайным набором команд", 
+                MessageBox.Show("Для задачи нужно как минимум 2 команды.", 
                     "Ошибка", 
                     MessageBoxButton.OK, MessageBoxImage.Warning);
-                proc = new MyProcess();
+                return;
             }
             else
                 proc = new MyProcess(CountCommand);
 
-            if (_ram_ost >= proc.Ram && myCPU.cpuState ==CpuState.Waiting)
-            {
-                _Processes.Add(proc);
-                _ram_ost -= proc.Ram;
-            }
-            else
-            {
-                _listMyPros.Add(proc);
-            }
-
+            _listMyPros.Add(proc);
         }
-        public void RemoveProcess(MyProcess proc) //Убирает с ObservableCollection процесс
+        public void RemoveProcess(MyProcess proc) 
         {
             proc.needDelete = true;
         }
