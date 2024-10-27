@@ -11,6 +11,7 @@ using System.Net.NetworkInformation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
+using System.Windows.Documents;
 
 
 namespace OperationSystem_ModelApp.Model
@@ -320,7 +321,6 @@ namespace OperationSystem_ModelApp.Model
                         {
                             MessageBox.Show("Квант закончился!");
                             proc.PSW = proc.CurrentCommandIndex;
-                            // Возвращаем процесс в список готовых задач
                             proc.State = ProcessState.Ready;
                             // ЦП уходит в ожидание после паузы
                             myCPU.cpuState = CpuState.Waiting;
@@ -336,7 +336,6 @@ namespace OperationSystem_ModelApp.Model
                             _ram_ost += proc.Ram;
                             myCPU.cpuState = CpuState.Waiting;
                         }
-
                         // Прерываем цикл после обработки одного процесса
                         break;
                     }
@@ -371,29 +370,15 @@ namespace OperationSystem_ModelApp.Model
         {
             if (_ram_ost > 0 && myCPU.cpuState == CpuState.Waiting)
             {
-                while (_listMyPros.Count > 0)
+                for (int i = 0; i < _listMyPros.Count ; i++)
                 {
-                    var firstItem = _listMyPros.First();
-                    if (_ram_ost >= firstItem.Ram)
+                    if (_ram_ost >= _listMyPros[i].Ram)
                     {
-                        _Processes.Add(firstItem);
-                        _ram_ost -= firstItem.Ram;
-                        _listMyPros.Remove(firstItem);
+                        _Processes.Add(_listMyPros[i]);
+                        _ram_ost -= _listMyPros[i].Ram;
+                        _listMyPros.Remove(_listMyPros[i]);
                     }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-            else if (_ram_ost < 0)
-            {
-                var item = _Processes.Last();
-                if (item != null) //Если список выполняемых задач не пустой
-                {
-                    _listMyPros.Add(item);
-                    _ram_ost += item.Ram;
-                    _Processes.Remove(item);
+
                 }
             }
         }
