@@ -1,3 +1,1 @@
-![image](https://github.com/user-attachments/assets/fbfc0129-64f1-4e70-8d55-994cc5dce722)
-TODO:
-Оборотное время (усредненное для всех выполненных задач время в тактах, прошедшее с момента загрузки задачи, до момента ее выгрузки из очереди)
+![image](https://github.com/user-attachments/assets/7766b08f-c452-4150-9ce7-b134e5a242b2)
