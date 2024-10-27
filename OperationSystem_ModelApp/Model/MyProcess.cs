@@ -100,6 +100,17 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        private bool _stopped;
+        public bool IsStopped
+        {
+            get => _stopped;
+            set
+            {
+                _stopped = value;
+                OnPropertyChanged("Stopped");
+            }
+        }
+
         /// <summary>
         /// Выполнение команды с возможностью остановки по завершении кванта
         /// </summary>
@@ -153,6 +164,7 @@ namespace OperationSystem_ModelApp.Model
             Id = _count;
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
             CountAllCommands = countCommands;
+            IsStopped = false;
 
             Debug.WriteLine($"*********Task #{id} **********");
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);

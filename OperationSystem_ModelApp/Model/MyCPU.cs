@@ -30,7 +30,6 @@ namespace OperationSystem_ModelApp.Model
             if (proc.State != ProcessState.Completed) // Если задача не завершена
             {
 
-
                 proc.State = ProcessState.StartTask;
                 await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_next, myOS.Speed));
 
@@ -48,6 +47,21 @@ namespace OperationSystem_ModelApp.Model
                         return;
                     }
 
+                    // Ожидание, пока процесс в состоянии Paused
+                    while (proc.IsStopped)
+                    {
+                        if (proc.State != ProcessState.Paused)
+                        {
+                            proc.State = ProcessState.Paused;
+                        }
+                        cpuState = CpuState.Waiting;
+                        await Task.Delay(100); // Пауза, пока IsStopped = true
+                    }
+
+                    // Возвращение к работе после паузы
+                    cpuState = CpuState.Working;
+                    proc.State = ProcessState.Running; // Возвращаем состояние выполнения
+
                     var fCommand = proc.Commands.First();
 
                     // Если команда IO
@@ -58,6 +72,14 @@ namespace OperationSystem_ModelApp.Model
                         await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_IntiIO, myOS.Speed)); // Инициализация IO
                         new Thread(() => InOut()).Start();
                         cpuState = CpuState.Waiting;
+
+                        // Проверяем, если процесс был переключен в Paused во время IO
+                        if (proc.IsStopped)
+                        {
+                            proc.State = ProcessState.Paused;
+                            return; // Завершаем выполнение, чтобы остаться в состоянии Paused
+                        }
+
                         break;  // Прерываем цикл при инициализации IO
                     }
                     else  // Если команда не IO

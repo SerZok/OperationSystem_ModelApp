@@ -160,8 +160,6 @@ namespace OperationSystem_ModelApp.Model
         public ObservableCollection<MyProcess> _listMyPros;
         public List<int> IOList;
 
-        
-
         private CancellationTokenSource _cancellationTokenSource; //Нужен для проверки ОЗУ
         private CancellationTokenSource _cancellationTokenSourceTasks; //Для проверки запуска заданий
         private readonly object _lock = new object();
@@ -207,6 +205,15 @@ namespace OperationSystem_ModelApp.Model
         public void RemoveProcess(MyProcess proc) 
         {
             proc.needDelete = true;
+        }
+        public void PauseCommand(MyProcess proc)
+        {
+            proc.IsStopped = !proc.IsStopped;
+            var prevState = proc.State;
+            if (proc.IsStopped)
+                proc.State = ProcessState.Paused;
+            else
+                proc.State = prevState;
         }
         public void CountTakt() //Счетчик тактов
         {
@@ -275,6 +282,12 @@ namespace OperationSystem_ModelApp.Model
                         _Processes.Remove(proc);
                         _ram_ost += proc.Ram;
                         break;
+                    }
+
+                    if(proc.IsStopped)
+                    {
+                        proc.State = ProcessState.Paused;
+                        continue;
                     }
 
                     if (isIO) //Процесс занят IO

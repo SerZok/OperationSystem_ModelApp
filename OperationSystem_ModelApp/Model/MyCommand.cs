@@ -99,7 +99,7 @@ namespace OperationSystem_ModelApp.Model
                     break;
 
                 default:
-                    timeTypeCommand = 1;
+                    timeTypeCommand = 2;
                     sizeTypeCommand = 1;
                     break;
             }

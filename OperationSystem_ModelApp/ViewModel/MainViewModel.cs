@@ -51,6 +51,20 @@ namespace OperationSystem_ModelApp.ViewModel
         private int _d_InOut;
         private string _pathToFile;
         private bool _IsEnabled;
+        private bool _isPaused;
+
+        public bool IsPaused
+        {
+            get => _isPaused;
+            set
+            {
+                if (_isPaused != value)
+                {
+                    _isPaused = value;
+                    OnPropertyChanged("IsPaused");
+                }
+            }
+        }
         public bool IsEnabled
         {
             get => _IsEnabled;
@@ -138,11 +152,6 @@ namespace OperationSystem_ModelApp.ViewModel
                 StrTimeOS = $"Времени прошло: {_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.ff")}";
                 CPU_State = "Состояние ЦП: " + Enum.GetName(typeof(CpuState), operatingSystem.myCPU.cpuState);
 
-                //if (RamOS == 0)
-                //    IsVisableProperty = false;
-                //else
-                //    IsVisableProperty = true;
-
                 if (operatingSystem.Ram != RamOS)
                     operatingSystem.Ram = RamOS;
 
@@ -150,11 +159,12 @@ namespace OperationSystem_ModelApp.ViewModel
                     MyOperationSystem.Kvant = Kvant;
 
                 operatingSystem.Speed = SpeedOS;
-
                 operatingSystem.T_next = T_next;
                 operatingSystem.T_IntiIO = T_IntiIO;
                 operatingSystem.T_IntrIO = T_IntrIO;
                 operatingSystem.T_Load = T_Load;
+
+                
 
                 OsCost = (100 - (int)Math.Round((double)RamOS_ostatok / RamOS * 100));
 
@@ -551,6 +561,19 @@ namespace OperationSystem_ModelApp.ViewModel
                         {
                             operatingSystem.RemoveProcess(SelectedTask);
                         }
+                    }));
+            }
+        }
+
+        private RelayCommand _pauseProc;
+        public RelayCommand PauseProc
+        {
+            get
+            {
+                return _pauseProc ??
+                    (_pauseProc = new RelayCommand(obj =>
+                    {
+                        operatingSystem.PauseCommand(SelectedTask);
                     }));
             }
         }

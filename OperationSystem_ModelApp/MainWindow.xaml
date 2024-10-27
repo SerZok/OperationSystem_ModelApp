@@ -131,7 +131,19 @@
                     </Border>
                 </Grid>
 
-                <Button Grid.Row="2" Content="Уничтожить выбранный процесс" Command="{Binding DelTask}" Margin="5"/>
+                <Grid  Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Label Grid.ColumnSpan="2" Content="Действия выбранным с процессом" Foreground="White" HorizontalAlignment="Center"/>
+                    <Button Grid.Row="1" Content="Уничтожить" Command="{Binding DelTask}" Margin="5"/>
+                    <Button Grid.Row="1" Grid.Column="1" Content="Приост/Возобн" Command="{Binding PauseProc}" Margin="5"/>
+                </Grid>
 
                 <!--Скорость работы ОС -->
                 <DockPanel Grid.Row="3">
