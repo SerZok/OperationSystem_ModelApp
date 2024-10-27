@@ -226,6 +226,7 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Grid.Resources>
@@ -301,6 +302,15 @@
                 </Grid.RowDefinitions>
                 <Label Content="Такты" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding Takt}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
+            </Grid>
+
+            <Grid Grid.Column="6" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="Об. время" Style="{StaticResource LabelAlign}"/>
+                <TextBox Text="{Binding OborotTime}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
         </Grid>
 

@@ -52,7 +52,15 @@ namespace OperationSystem_ModelApp.ViewModel
         private string _pathToFile;
         private bool _IsEnabled;
         private bool _isPaused;
-
+        private int _oborotTime;
+        public int OborotTime {
+            get => _oborotTime;
+            set
+            {
+                _oborotTime = value;
+                OnPropertyChanged("OborotTime");
+            }
+        }
         public bool IsPaused
         {
             get => _isPaused;
@@ -115,10 +123,15 @@ namespace OperationSystem_ModelApp.ViewModel
             T_IntrIO = 2;
             T_Load = 4;
             D_InOut = 20;
+            OborotTime = 0;
         }
 
         public Random random;
         public ObservableCollection<MyProcess> ProcessesOS { get; set; }
+
+        /// <summary>
+        /// Класс для парсинга
+        /// </summary>
         public class ParamsForOS
         {
             public int Ram { get; set; }
@@ -164,12 +177,12 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.T_IntrIO = T_IntrIO;
                 operatingSystem.T_Load = T_Load;
 
-                
-
                 OsCost = (100 - (int)Math.Round((double)RamOS_ostatok / RamOS * 100));
 
                 CompletedTasks = operatingSystem.CompetedTasks;
                 operatingSystem.D_InOut = D_InOut;
+
+                OborotTime = operatingSystem.ObobrotTime;
             }
         }
         private bool IsGenerating

@@ -111,6 +111,8 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        public int StartTime { get; set; } = 0;
+
         /// <summary>
         /// Выполнение команды с возможностью остановки по завершении кванта
         /// </summary>

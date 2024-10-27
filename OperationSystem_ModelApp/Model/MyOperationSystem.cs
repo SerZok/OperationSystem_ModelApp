@@ -156,6 +156,18 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        private int _totalOborotTime;
+        private int _oborotTime;
+        public int ObobrotTime
+        {
+            get => _oborotTime;
+            set
+            {
+                _oborotTime = value;
+                OnPropertyChanged("ObobrotTime");
+            }
+        }
+
         public ObservableCollection<MyProcess> _Processes;
         public ObservableCollection<MyProcess> _listMyPros;
         public List<int> IOList;
@@ -273,6 +285,10 @@ namespace OperationSystem_ModelApp.Model
                 {
                     myCPU.cpuState = CpuState.Working;
                     var proc = _Processes[i];
+
+                    if(proc.StartTime==0)
+                        proc.StartTime = Takt;
+
                     bool isIO = (proc.State == ProcessState.InputOutput || proc.State == ProcessState.Init_IO || proc.State == ProcessState.End_IO);
 
                     //Если надо удалить процесс
@@ -309,9 +325,13 @@ namespace OperationSystem_ModelApp.Model
                             // ЦП уходит в ожидание после паузы
                             myCPU.cpuState = CpuState.Waiting;
                         }
+                        // Процесс завершен, его больше не нужно планировать
                         else if (proc.State == ProcessState.Completed)
                         {
-                            // Процесс завершен, его больше не нужно планировать
+                            int obTime = (Takt - proc.StartTime);
+                            _totalOborotTime += obTime;
+                            ObobrotTime = _totalOborotTime / CompetedTasks;
+
                             _Processes.Remove(proc);
                             _ram_ost += proc.Ram;
                             myCPU.cpuState = CpuState.Waiting;
