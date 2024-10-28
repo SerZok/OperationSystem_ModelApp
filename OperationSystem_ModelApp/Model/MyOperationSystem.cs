@@ -247,18 +247,21 @@ namespace OperationSystem_ModelApp.Model
             while (true)
             {
                 Takt++;
+                Thread.Sleep(Speed);
                 if (_Processes.Any())
                 {
-                    foreach (var proc in _Processes)
+                    lock (_lock)
                     {
-                        if(proc.State == ProcessState.Ready)
+                        foreach (var proc in _Processes)
                         {
-                            proc.WaitTime++;
+                            if(proc.State == ProcessState.Ready)
+                            {
+                                proc.WaitTime++;
+                            }
                         }
                     }
 
                 }
-                Thread.Sleep(Speed);
             }
         }
 
@@ -358,11 +361,14 @@ namespace OperationSystem_ModelApp.Model
                         {
                             int obTime = (Takt - proc.StartTime);
                             _totalOborotTime += obTime;
+
                             ObobrotTime = _totalOborotTime / CompetedTasks;
 
                             int Tmono = proc.AllTime + proc.WaitTime + T_Load + T_IntiIO + T_IntrIO + T_next;
                             _totalMonoTime += Tmono;
                             T_mono = _totalMonoTime / CompetedTasks;
+
+                            //Производительность
                             T_mono = Takt / T_mono;
 
                             _Processes.Remove(proc);
