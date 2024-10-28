@@ -211,15 +211,14 @@
                     </DataGrid.RowStyle>
                 </DataGrid>
             </TabItem>
-            <TabItem Header="Console">
-                <TextBlock Name="Console" Background="White" Text="{Binding TextConsole}" Margin="15"/>
-            </TabItem>
+
         </TabControl>
 
 
         <!--Параметры (верхние панельки)-->
         <Grid Grid.ColumnSpan="2" Background="#707070" Margin="10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -309,8 +308,17 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Об. время" Style="{StaticResource LabelAlign}"/>
+                <Label Content="Tmult" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding OborotTime}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
+            </Grid>
+
+            <Grid Grid.Column="7" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="T_mono" Style="{StaticResource LabelAlign}"/>
+                <TextBox Text="{Binding T_mono}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
         </Grid>
 

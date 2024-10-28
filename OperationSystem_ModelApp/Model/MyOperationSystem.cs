@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Windows.Documents;
+using System.Security.RightsManagement;
 
 
 namespace OperationSystem_ModelApp.Model
@@ -158,14 +159,27 @@ namespace OperationSystem_ModelApp.Model
         }
 
         private int _totalOborotTime;
-        private int _oborotTime;
-        public int ObobrotTime
+        private int _totalMonoTime;
+
+        private float _oborotTime;
+        private float _t_mono;
+        public float ObobrotTime
         {
             get => _oborotTime;
             set
             {
                 _oborotTime = value;
                 OnPropertyChanged("ObobrotTime");
+            }
+        }
+
+        public float T_mono
+        {
+            get => _t_mono;
+            set
+            {
+                _t_mono = value;
+                OnPropertyChanged("T_mono");
             }
         }
 
@@ -223,19 +237,31 @@ namespace OperationSystem_ModelApp.Model
         {
             proc.IsStopped = !proc.IsStopped;
             var prevState = proc.State;
-            if (proc.IsStopped)
-                proc.State = ProcessState.Paused;
-            else
-                proc.State = prevState;
+            //if (proc.IsStopped)
+            //    proc.State = ProcessState.Paused;
+            //else
+            //    proc.State = prevState;
         }
         public void CountTakt() //Счетчик тактов
         {
             while (true)
             {
                 Takt++;
+                if (_Processes.Any())
+                {
+                    foreach (var proc in _Processes)
+                    {
+                        if(proc.State == ProcessState.Ready)
+                        {
+                            proc.WaitTime++;
+                        }
+                    }
+
+                }
                 Thread.Sleep(Speed);
             }
         }
+
         public int ConvertTaktToMillisec(int takt, int speed)
         {
             return takt * speed;
@@ -284,7 +310,8 @@ namespace OperationSystem_ModelApp.Model
 
                 for (int i = 0; i < _Processes.Count; i++)
                 {
-                    myCPU.cpuState = CpuState.Working;
+                    //myCPU.cpuState = CpuState.Working;
+                    myCPU.ChangeCpuState(myCPU, CpuState.Working);
                     var proc = _Processes[i];
 
                     if(proc.StartTime==0)
@@ -295,21 +322,22 @@ namespace OperationSystem_ModelApp.Model
                     //Если надо удалить процесс
                     if (proc.needDelete && !isIO)
                     {
-                        proc.State = ProcessState.Completed;
+                        ChangeProcState(proc, ProcessState.Completed);
                         _Processes.Remove(proc);
                         _ram_ost += proc.Ram;
                         break;
                     }
 
-                    if(proc.IsStopped)
+                    //Если надо приостановить процесс
+                    if(proc.IsStopped && !isIO)
                     {
-                        proc.State = ProcessState.Paused;
+                        ChangeProcState(proc, ProcessState.Paused);
                         continue;
                     }
 
                     if (isIO) //Процесс занят IO
                     {
-                        myCPU.cpuState = CpuState.Waiting;
+                        myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
                         continue;
                     }
                     else
@@ -321,9 +349,9 @@ namespace OperationSystem_ModelApp.Model
                         {
                             MessageBox.Show("Квант закончился!");
                             proc.PSW = proc.CurrentCommandIndex;
-                            proc.State = ProcessState.Ready;
-                            // ЦП уходит в ожидание после паузы
-                            myCPU.cpuState = CpuState.Waiting;
+
+                            ChangeProcState(proc, ProcessState.Ready);
+                            myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
                         }
                         // Процесс завершен, его больше не нужно планировать
                         else if (proc.State == ProcessState.Completed)
@@ -332,19 +360,36 @@ namespace OperationSystem_ModelApp.Model
                             _totalOborotTime += obTime;
                             ObobrotTime = _totalOborotTime / CompetedTasks;
 
+                            int Tmono = proc.AllTime + proc.WaitTime + T_Load + T_IntiIO + T_IntrIO + T_next;
+                            _totalMonoTime += Tmono;
+                            T_mono = _totalMonoTime / CompetedTasks;
+                            T_mono = Takt / T_mono;
+
                             _Processes.Remove(proc);
                             _ram_ost += proc.Ram;
-                            myCPU.cpuState = CpuState.Waiting;
+                            myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
                         }
+
                         // Прерываем цикл после обработки одного процесса
                         break;
                     }
                 }
-                myCPU.cpuState = CpuState.Waiting;
-
+                //myCPU.cpuState = CpuState.Waiting;
+                myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
             }
         }
 
+        /// <summary>
+        /// Изменение состояния процесса
+        /// </summary>
+        /// <param name="proc">Процесс, которому надо изменить состояние </param>
+        /// <param name="state">Состояние, которое надо присвоить </param>
+        public void ChangeProcState(MyProcess proc, ProcessState state)
+        {
+
+            if (proc.State != state)
+                proc.State = state;
+        }
 
         //Старт проверки ОЗУ
         private async void StartRamCheck(CancellationToken cancellationToken)

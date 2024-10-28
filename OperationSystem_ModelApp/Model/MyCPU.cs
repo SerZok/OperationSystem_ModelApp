@@ -29,8 +29,7 @@ namespace OperationSystem_ModelApp.Model
         {
             if (proc.State != ProcessState.Completed) // Если задача не завершена
             {
-
-                proc.State = ProcessState.StartTask;
+                myOS.ChangeProcState(proc , ProcessState.StartTask);
                 await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_next, myOS.Speed));
 
                 // Счетчик оставшегося времени на выполнение (в тактах)
@@ -38,87 +37,77 @@ namespace OperationSystem_ModelApp.Model
 
                 while (proc.Commands.Any() && remainingKvant > 0) // Выполняем, пока есть команды и квант не исчерпан
                 {
-                    //Если помечен на удаление, и выполняется (Running)
-                    if (proc.needDelete)
-                    {
-                        proc.State = ProcessState.Completed;
-                        myOS._Processes.Remove(proc);
-                        myOS.Ram_ost += proc.Ram;
-                        return;
-                    }
-
-                    // Ожидание, пока процесс в состоянии Paused
-                    while (proc.IsStopped)
-                    {
-                        if (proc.State != ProcessState.Paused)
-                        {
-                            proc.State = ProcessState.Paused;
-                        }
-                        cpuState = CpuState.Waiting;
-                        await Task.Delay(100); // Пауза, пока IsStopped = true
-                    }
 
                     // Возвращение к работе после паузы
                     cpuState = CpuState.Working;
-                    proc.State = ProcessState.Running; // Возвращаем состояние выполнения
+                    myOS.ChangeProcState(proc, ProcessState.StartTask);
 
                     var fCommand = proc.Commands.First();
-
                     // Если команда IO
                     if (fCommand.TypeCmd.nameTypeCommand == NameTypeCommand.IO)
                     {
-                        proc.State = ProcessState.Init_IO;
+                        //proc.State = ProcessState.Init_IO;
+                        myOS.ChangeProcState(proc, ProcessState.Init_IO);
                         myOS.IOList.Add(proc.Id);
                         await Task.Delay(myOS.ConvertTaktToMillisec(myOS.T_IntiIO, myOS.Speed)); // Инициализация IO
                         new Thread(() => InOut()).Start();
-                        cpuState = CpuState.Waiting;
 
-                        // Проверяем, если процесс был переключен в Paused во время IO
-                        if (proc.IsStopped)
-                        {
-                            proc.State = ProcessState.Paused;
-                            return; // Завершаем выполнение, чтобы остаться в состоянии Paused
-                        }
+                        ChangeCpuState (this, CpuState.Waiting);
 
                         break;  // Прерываем цикл при инициализации IO
                     }
                     else  // Если команда не IO
                     {
-                        proc.State = ProcessState.Running;
-
+                        //proc.State = ProcessState.Running;
+                        myOS.ChangeProcState(proc, ProcessState.Running);
                         // Выполняем команду с учетом скорости (в тактах)
                         var timeTaken = await proc.DoTask(fCommand, myOS.Speed, remainingKvant);
 
                         // Уменьшаем оставшийся квант
                         remainingKvant -= timeTaken;
-
-                        // Удаляем выполненную команду
                         proc.Commands.Remove(fCommand);
 
                         // Если квант закончился, останавливаем процесс
                         if (remainingKvant <= 0)
                         {
                             //MessageBox.Show("Квант закончился!");
-                            proc.State = ProcessState.Paused;
-                            //proc.CurrentCommandIndex;
-                            cpuState = CpuState.Waiting;
-                            return;  // Завершаем выполнение для текущего кванта
+                            //proc.State = ProcessState.Paused;
+                            myOS.ChangeProcState(proc, ProcessState.Paused);
+
+                            //cpuState = CpuState.Waiting;
+                            ChangeCpuState(this, CpuState.Waiting);
+                            return;
                         }
                     }
                 }
 
                 if (!proc.Commands.Any())  // Все команды выполнены
                 {
-                    proc.State = ProcessState.Completed;
+                    myOS.ChangeProcState(proc, ProcessState.Completed);
                     myOS.RemoveProcess(proc);  // Удаляем завершенный процесс
-                    cpuState = CpuState.Waiting;
+
+                    //cpuState = CpuState.Waiting;
+                    ChangeCpuState(this, CpuState.Waiting);
                     myOS.CompetedTasks++;
                 }
             }
             else  // Если задача уже завершена
             {
                 myOS.RemoveProcess(proc);
-                cpuState = CpuState.Waiting;
+                ChangeCpuState(this, CpuState.Waiting);
+            }
+        }
+
+        /// <summary>
+        /// Метод изменения состояния процессора
+        /// </summary>
+        /// <param name="cpu">процессор, у которого надо изменить состояние</param>
+        /// <param name="state">состояние, которое надо задать</param>
+        public void ChangeCpuState(MyCPU cpu, CpuState state)
+        {
+            if (cpu.cpuState != state)
+            {
+                cpu.cpuState = state;
             }
         }
 
@@ -129,7 +118,9 @@ namespace OperationSystem_ModelApp.Model
             if (proc != null)
             {
                 myOS.IOList.Remove(id);
-                proc.State = ProcessState.InputOutput;
+
+                //proc.State = ProcessState.InputOutput;
+                myOS.ChangeProcState(proc, ProcessState.InputOutput);
 
                 var fCommand = proc.Commands.First();
 
@@ -142,7 +133,9 @@ namespace OperationSystem_ModelApp.Model
 
                 proc.Commands.Remove(fCommand);
 
-                proc.State = ProcessState.End_IO;
+                //proc.State = ProcessState.End_IO;
+                myOS.ChangeProcState(proc, ProcessState.End_IO);
+
                 Thread.Sleep(myOS.ConvertTaktToMillisec(myOS.T_IntrIO, myOS.Speed));
 
                 if (proc.Commands.Any())

@@ -112,6 +112,8 @@ namespace OperationSystem_ModelApp.Model
         }
 
         public int StartTime { get; set; } = 0;
+        public int AllTime { get; set; }
+        public int WaitTime {  get; set; } = 0;
 
         /// <summary>
         /// Выполнение команды с возможностью остановки по завершении кванта
@@ -159,6 +161,10 @@ namespace OperationSystem_ModelApp.Model
         {
             Id = i;
             Commands = new ObservableCollection<Command>(commands);
+            foreach (var cmd in Commands)
+            {
+                AllTime += cmd.TypeCmd.timeTypeCommand;
+            }
         }
         public MyProcess()
         {
@@ -167,6 +173,8 @@ namespace OperationSystem_ModelApp.Model
             countCommands = rnd.Next(2, 30); //Максммум 30 комманд
             CountAllCommands = countCommands;
             IsStopped = false;
+
+
 
             Debug.WriteLine($"*********Task #{id} **********");
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
@@ -202,6 +210,12 @@ namespace OperationSystem_ModelApp.Model
                 Ram += command.TypeCmd.sizeTypeCommand;
                 Commands.Add(command);
             }
+
+            foreach (var cmd in Commands)
+            {
+                AllTime += cmd.TypeCmd.timeTypeCommand;
+            }
+
             State = ProcessState.Ready;
         }
         public MyProcess(int countCom)
@@ -211,6 +225,7 @@ namespace OperationSystem_ModelApp.Model
             countCommands = countCom;
             CountAllCommands = countCommands;
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
+
 
             // Генерация случайных индексов для команд IO
             HashSet<int> ioIndices = new HashSet<int>();
@@ -244,6 +259,12 @@ namespace OperationSystem_ModelApp.Model
                 Ram += command.TypeCmd.sizeTypeCommand;
                 Commands.Add(command);
             }
+
+            foreach (var cmd in Commands)
+            {
+                AllTime += cmd.TypeCmd.timeTypeCommand;
+            }
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

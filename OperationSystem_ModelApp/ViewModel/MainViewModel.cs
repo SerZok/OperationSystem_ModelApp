@@ -52,8 +52,19 @@ namespace OperationSystem_ModelApp.ViewModel
         private string _pathToFile;
         private bool _IsEnabled;
         private bool _isPaused;
-        private int _oborotTime;
-        public int OborotTime {
+        private float _oborotTime;
+        private float _t_mono;
+
+        public float T_mono
+        {
+            get => _t_mono;
+            set
+            {
+                _t_mono= value;
+                OnPropertyChanged("T_mono");
+            }
+        }
+        public float OborotTime {
             get => _oborotTime;
             set
             {
@@ -124,6 +135,7 @@ namespace OperationSystem_ModelApp.ViewModel
             T_Load = 4;
             D_InOut = 20;
             OborotTime = 0;
+            T_mono = 0;
         }
 
         public Random random;
@@ -183,6 +195,7 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.D_InOut = D_InOut;
 
                 OborotTime = operatingSystem.ObobrotTime;
+                T_mono = operatingSystem.T_mono;
             }
         }
         private bool IsGenerating
