@@ -350,7 +350,7 @@ namespace OperationSystem_ModelApp.Model
                         // Проверка, завершил ли процесс выполнение всех команд
                         if (proc.State == ProcessState.Paused)
                         {
-                            MessageBox.Show("Квант закончился!");
+                            //MessageBox.Show("Квант закончился!");
                             proc.PSW = proc.CurrentCommandIndex;
 
                             ChangeProcState(proc, ProcessState.Ready);
@@ -375,14 +375,19 @@ namespace OperationSystem_ModelApp.Model
                             _ram_ost += proc.Ram;
                             myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
                         }
-
-                        // Прерываем цикл после обработки одного процесса
                         break;
                     }
                 }
-                //myCPU.cpuState = CpuState.Waiting;
                 myCPU.ChangeCpuState(myCPU, CpuState.Waiting);
             }
+        }
+
+        public async Task StartIoPC(MyProcess proc)
+        {
+            ChangeProcState(proc, ProcessState.Init_IO);
+            IOList.Add(proc.Id);
+            await Task.Delay(ConvertTaktToMillisec(T_IntiIO, Speed)); // Инициализация IO
+            new Thread(() => myCPU.InOut()).Start();
         }
 
         /// <summary>
@@ -416,7 +421,7 @@ namespace OperationSystem_ModelApp.Model
 
         //Если хватает свободной памяти для задачи,
         //то выгружаем из List и загружаем в ObservableCollection
-        //+ если процессор ожидает.
+        //+ если процессор ожидает. 
         public void CheckRam()
         {
             if (_ram_ost > 0 && myCPU.cpuState == CpuState.Waiting)

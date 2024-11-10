@@ -174,8 +174,6 @@ namespace OperationSystem_ModelApp.Model
             CountAllCommands = countCommands;
             IsStopped = false;
 
-
-
             Debug.WriteLine($"*********Task #{id} **********");
             int ioCommandCount = (int)((double)DInOut / 100 * countCommands);
 

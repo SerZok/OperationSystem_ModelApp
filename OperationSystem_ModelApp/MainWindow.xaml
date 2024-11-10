@@ -308,7 +308,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Tmult" Style="{StaticResource LabelAlign}"/>
+                <Label Content="Об. время" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding OborotTime}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
 
@@ -317,7 +317,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="T_mono" Style="{StaticResource LabelAlign}"/>
+                <Label Content="Прозв-ть %" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding T_mono}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
         </Grid>
