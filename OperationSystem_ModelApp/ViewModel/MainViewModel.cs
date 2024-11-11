@@ -136,6 +136,7 @@ namespace OperationSystem_ModelApp.ViewModel
             D_InOut = 20;
             OborotTime = 0;
             T_mono = 0;
+            Proizv = 0;
         }
 
         public Random random;
@@ -195,7 +196,19 @@ namespace OperationSystem_ModelApp.ViewModel
                 operatingSystem.D_InOut = D_InOut;
 
                 OborotTime = operatingSystem.ObobrotTime;
+                Proizv= operatingSystem.Proizv;
                 T_mono = operatingSystem.T_mono;
+            }
+        }
+
+        private float _proizv;
+        public float Proizv
+        {
+            get => _proizv;
+            set
+            {
+                _proizv = value;
+                OnPropertyChanged("Proizv");
             }
         }
         private bool IsGenerating

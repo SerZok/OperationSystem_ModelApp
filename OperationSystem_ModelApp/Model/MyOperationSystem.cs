@@ -183,6 +183,17 @@ namespace OperationSystem_ModelApp.Model
             }
         }
 
+        private float _proizv;
+        public float Proizv
+        {
+            get => _proizv;
+            set
+            {
+                _proizv = value;
+                OnPropertyChanged("Proizv");
+            }
+        }
+
         public ObservableCollection<MyProcess> _Processes;
         public ObservableCollection<MyProcess> _listMyPros;
         public List<int> IOList;
@@ -368,8 +379,11 @@ namespace OperationSystem_ModelApp.Model
                             _totalMonoTime += Tmono;
                             T_mono = _totalMonoTime / CompetedTasks;
 
+                            //Эффективность
+                            Proizv =  ObobrotTime / T_mono;
+
                             //Производительность
-                            T_mono = Takt / T_mono;
+                            T_mono = ((float)_totalOborotTime /  (float)Takt) * 100;
 
                             _Processes.Remove(proc);
                             _ram_ost += proc.Ram;

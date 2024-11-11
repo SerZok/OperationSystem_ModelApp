@@ -226,6 +226,7 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Grid.Resources>
@@ -317,8 +318,17 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Content="Прозв-ть %" Style="{StaticResource LabelAlign}"/>
+                <Label Content="Произ-ть %" Style="{StaticResource LabelAlign}"/>
                 <TextBox Text="{Binding T_mono}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
+            </Grid>
+
+            <Grid Grid.Column="8" Margin="5,5,5,5" Background="#909090" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="Эфф-ть %" Style="{StaticResource LabelAlign}"/>
+                <TextBox Text="{Binding Proizv}" Grid.Row="1" IsReadOnly="True" Style="{StaticResource TextBoxAlign}" Background="#CCC"/>
             </Grid>
         </Grid>
 
